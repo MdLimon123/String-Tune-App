@@ -42,6 +42,12 @@ class StorageService {
   Future<void> saveLanguageCode(String code) =>
       _prefs.setString(StorageKeys.locale, code);
 
+  // Saved setups
+  String? getSavedSetupsJson() => _prefs.getString(StorageKeys.savedSetups);
+
+  Future<void> saveSavedSetupsJson(String value) =>
+      _prefs.setString(StorageKeys.savedSetups, value);
+
   // Auth
   bool get isLoggedIn {
     final token = getToken();

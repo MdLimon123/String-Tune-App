@@ -1,9 +1,10 @@
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/core/utils/custom_switch.dart';
+import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/route_manager.dart';
+import 'package:get/get.dart';
 
 class CalculateScreen extends StatefulWidget {
   const CalculateScreen({super.key});
@@ -13,325 +14,303 @@ class CalculateScreen extends StatefulWidget {
 }
 
 class _CalculateScreenState extends State<CalculateScreen> {
-  bool isMultiScale = false;
-  bool isGuitar = true;
-  int numberOfStrings = 6;
-  double scaleLength = 25.5;
+  final c = Get.find<TuningWorkbenchController>();
+
   bool showTuningDropdown = false;
   bool showStringTypeDropdown = false;
-  String selectedTuning = 'Browse Tuning Library';
-  String selectedStringType = 'Selected String Type';
-
-
-  final List<Map<String, dynamic>> guitarStrings = [
-    {
-      'name': 'e',
-      'type': 'P',
-      'gauge': 10,
-      'tension': '14.3 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'A',
-      'type': 'P',
-      'gauge': 13,
-      'tension': '18.7 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'D',
-      'type': 'P',
-      'gauge': 17,
-      'tension': '17.9 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'G',
-      'type': 'P',
-      'gauge': 26,
-      'tension': '16.8 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'B',
-      'type': 'P',
-      'gauge': 36,
-      'tension': '15.4 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'E',
-      'type': 'P',
-      'gauge': 46,
-      'tension': '19.2 lbs',
-      'scale': 25.5,
-    },
-  ];
-
-
-  final List<String> tuningOptions = [
-    'E Standard',
-    'Eb Standard',
-    'D Standard',
-    'C# Standard',
-    'C Standard',
-    'B Standard',
-    'A# Standard',
-    'A Standard',
-    'G# Standard',
-    'F Standard',
-    'Drop D',
-    'Drop C#',
-    'Drop C',
-    'Drop B',
-    'Drop A#',
-    'Drop A',
-    'Drop G#',
-    'Drop G',
-    'Drop F#',
-    'Drop F',
-    'Open E',
-    'Open D',
-    'Open C',
-    'Open G',
-    'Open A',
-  ];
-
-  final List<Map<String, dynamic>> bassStrings = [
-    {
-      'name': 'G',
-      'type': 'P',
-      'gauge': 45,
-      'tension': '14.3 lbs',
-      'scale': 34.0,
-    },
-    {
-      'name': 'D',
-      'type': 'W',
-      'gauge': 65,
-      'tension': '18.7 lbs',
-      'scale': 34.0,
-    },
-    {
-      'name': 'A',
-      'type': 'W',
-      'gauge': 85,
-      'tension': '17.9 lbs',
-      'scale': 34.0,
-    },
-    {
-      'name': 'E',
-      'type': 'P',
-      'gauge': 105,
-      'tension': '16.8 lbs',
-      'scale': 34.0,
-    },
-  ];
-
-  List<Map<String, dynamic>> get strings =>
-      isGuitar ? guitarStrings : bassStrings;
-
-  final List<String> stringTypeOptions = [
-    'Nickel-Wound',
-    'Nickel-Plated Steel',
-    'Stainless Steel',
-    'Half Wound',
-    'Flatwound',
-  ];
-
-  String _formatGauge(int gauge) {
-    if (gauge < 10) return '.00$gauge';
-    return '.$gauge';
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E1F),
-
       appBar: CustomAppbar(title: 'Calculate String Tension'),
+      body: GetBuilder<TuningWorkbenchController>(
+        builder: (_) {
+          final isGuitar = c.calcInstrument == 'guitar';
+          final names = c.getStringNames(
+            c.calcInstrument,
+            c.calcStringCount,
+            c.calcTuning,
+          );
 
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Center(child: _label('Instrument')),
-                const SizedBox(height: 10),
-                Center(child: _buildInstrumentToggle()),
-                const SizedBox(height: 24),
-
-                Center(child: _label('Number of Strings')),
-                const SizedBox(height: 10),
-                Center(
-                  child: _buildCounter(
-                    value: numberOfStrings.toString(),
-                    onDecrement: () => setState(() {
-                      if (numberOfStrings > 4) numberOfStrings--;
-                    }),
-                    onIncrement: () => setState(() {
-                      if (numberOfStrings < 12) numberOfStrings++;
-                    }),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                Center(child: _label('Scale Length')),
-                const SizedBox(height: 10),
-                Center(
-                  child: _buildCounter(
-                    value: '${scaleLength.toStringAsFixed(1)}"',
-                    onDecrement: () => setState(() {
-                      if (scaleLength > 24.0) scaleLength -= 0.5;
-                    }),
-                    onIncrement: () => setState(() {
-                      if (scaleLength < 30.0) scaleLength += 0.5;
-                    }),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomSwitch(
-                      value: isMultiScale,
-                      onChanged: (value) =>
-                          setState(() => isMultiScale = value),
-                    ),
-
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Multi-Scale Instrument',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                    Center(child: _label('Instrument')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildInstrumentToggle(
+                        isGuitar: isGuitar,
+                        onGuitar: () => c.changeCalcInstrument(true),
+                        onBass: () => c.changeCalcInstrument(false),
                       ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Center(child: _label('Number of Strings')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildCounter(
+                        value: c.calcStringCount.toString(),
+                        onDecrement: () =>
+                            c.changeCalcStringCount(c.calcStringCount - 1),
+                        onIncrement: () =>
+                            c.changeCalcStringCount(c.calcStringCount + 1),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Center(child: _label('Scale Length')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildCounter(
+                        value: '${c.calcScaleLength.toStringAsFixed(1)}"',
+                        onDecrement: () => c.setCalcScale(
+                          (c.calcScaleLength - 0.5).clamp(24.0, 36.0),
+                        ),
+                        onIncrement: () => c.setCalcScale(
+                          (c.calcScaleLength + 0.5).clamp(24.0, 36.0),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomSwitch(
+                          value: c.calcMultiScale,
+                          onChanged: c.setCalcMultiScale,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Multi-Scale Instrument',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    _label('String Type'),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        showStringTypeDropdown = true;
+                        showTuningDropdown = false;
+                      }),
+                      child: _buildDropdown(
+                        c.resolveStringTypeLabel(c.stringType),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    _label('Current Tuning'),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        showTuningDropdown = true;
+                        showStringTypeDropdown = false;
+                      }),
+                      child: _buildDropdown(c.resolveTuningLabel(c.calcTuning)),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF15192B),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Total Neck Tension: ${c.calcTotalTension.toStringAsFixed(1)} lbs',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildTableHeader(showScale: c.calcMultiScale),
+                    const SizedBox(height: 8),
+
+                    ...List.generate(c.calcStringCount, (i) {
+                      final scale = c.calcMultiScale
+                          ? c.calcStringScales[i]
+                          : c.calcScaleLength;
+                      return _buildStringRow(
+                        name: names[i],
+                        index: i,
+                        gauge: c.calcGauges[i],
+                        isWound: c.calcWounds[i],
+                        tension: c.calcTensions.length > i
+                            ? c.calcTensions[i]
+                            : 0,
+                        showScale: c.calcMultiScale,
+                        scale: scale,
+                        onScaleUp: () => c.setCalcStringScale(
+                          i,
+                          (scale + 0.5).clamp(24.0, 36.0),
+                        ),
+                        onScaleDown: () => c.setCalcStringScale(
+                          i,
+                          (scale - 0.5).clamp(24.0, 36.0),
+                        ),
+                        onGaugeUp: () => c.bumpCalcGauge(i, 1),
+                        onGaugeDown: () => c.bumpCalcGauge(i, -1),
+                        onTypePlain: () => c.toggleCalcWound(i, false),
+                        onTypeWound: () => c.toggleCalcWound(i, true),
+                      );
+                    }),
+                    const SizedBox(height: 30),
+
+                    _buildOutlineActionButton(
+                      text: 'Save this Setup',
+                      color: const Color(0xFFD8B4FE),
+                      borderColor: const Color(0xFF9333EA),
+                      onTap: () => _onSaveSetupTap(),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomButton(
+                      onTap: () {
+                        c.prepareShop(
+                          gauges: c.calcGauges,
+                          wounds: c.calcWounds,
+                        );
+                        Get.toNamed(AppRoutes.shopSetup);
+                      },
+                      text: 'Shop This Setup',
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-
-                _label('String Type'),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    showStringTypeDropdown = true;
-                    showTuningDropdown = false;
-                  }),
-                  child: _buildDropdown(selectedStringType),
-                ),
-                const SizedBox(height: 24),
-
-                _label('Current Tuning'),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    showTuningDropdown = true;
-                    showStringTypeDropdown = false;
-                  }),
-                  child: _buildDropdown(selectedTuning),
-                ),
-                const SizedBox(height: 24),
-
-                // Total Neck Tension
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 20,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF15192B),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'Total Neck Tension: 118.4 lbs',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+              ),
+              if (showTuningDropdown || showStringTypeDropdown)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () => setState(() {
+                      showTuningDropdown = false;
+                      showStringTypeDropdown = false;
+                    }),
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.3),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 16),
-
-                // Table Header
-                _buildTableHeader(),
-                const SizedBox(height: 8),
-
-                // String Rows
-                ...List.generate(strings.length, (i) => _buildStringRow(i)),
-                const SizedBox(height: 30),
-
-                // Shop Button
-                CustomButton(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.shopSetup);
-                  },
-                  text: "Shop This Setup",
+              if (showTuningDropdown)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildBottomSheet(
+                    items: c.tuningLabels,
+                    onSelect: (item) {
+                      c.setCalcTuningByLabel(item);
+                      setState(() => showTuningDropdown = false);
+                    },
+                  ),
                 ),
-              ],
-            ),
-          ),
-
-          // Dropdowns overlay
-          if (showTuningDropdown || showStringTypeDropdown)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => setState(() {
-                  showTuningDropdown = false;
-                  showStringTypeDropdown = false;
-                }),
-                child: Container(color: Colors.black.withOpacity(0.3)),
-              ),
-            ),
-          if (showTuningDropdown)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildBottomSheet(
-                items: tuningOptions,
-                onSelect: (item) => setState(() {
-                  selectedTuning = item;
-                  showTuningDropdown = false;
-                }),
-              ),
-            ),
-          if (showStringTypeDropdown)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildBottomSheet(
-                items: stringTypeOptions,
-                onSelect: (item) => setState(() {
-                  selectedStringType = item;
-                  showStringTypeDropdown = false;
-                }),
-              ),
-            ),
-        ],
+              if (showStringTypeDropdown)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildBottomSheet(
+                    items: c.stringTypeLabels,
+                    onSelect: (item) {
+                      c.setStringTypeByLabel(item);
+                      setState(() => showStringTypeDropdown = false);
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _label(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: Color(0xFFFFFFFF),
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-    ),
-  );
+  Future<void> _onSaveSetupTap() async {
+    final result = await c.saveFromCalculator();
 
-  Widget _buildInstrumentToggle() {
+    String message;
+    switch (result) {
+      case SaveSetupResult.saved:
+        message = 'Setup saved. You can find it in Library.';
+      case SaveSetupResult.duplicate:
+        message = 'This setup is already saved.';
+      case SaveSetupResult.invalid:
+        message = 'Unable to save this setup. Please check inputs.';
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF1A1D2E),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Widget _buildOutlineActionButton({
+    required String text,
+    required Color color,
+    required Color borderColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 52,
+        decoration: BoxDecoration(
+          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(53),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _label(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Color(0xFFFFFFFF),
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+  }
+
+  Widget _buildInstrumentToggle({
+    required bool isGuitar,
+    required VoidCallback onGuitar,
+    required VoidCallback onBass,
+  }) {
     return Container(
       width: 154,
       padding: const EdgeInsets.all(4),
@@ -341,20 +320,8 @@ class _CalculateScreenState extends State<CalculateScreen> {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _toggleItem(
-              'Guitar',
-              isGuitar,
-              () => setState(() => isGuitar = true),
-            ),
-          ),
-          Expanded(
-            child: _toggleItem(
-              'Bass',
-              !isGuitar,
-              () => setState(() => isGuitar = false),
-            ),
-          ),
+          Expanded(child: _toggleItem('Guitar', isGuitar, onGuitar)),
+          Expanded(child: _toggleItem('Bass', !isGuitar, onBass)),
         ],
       ),
     );
@@ -452,12 +419,15 @@ class _CalculateScreenState extends State<CalculateScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            value,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           const Icon(
@@ -470,21 +440,21 @@ class _CalculateScreenState extends State<CalculateScreen> {
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader({required bool showScale}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Color(0xFF0F172A),
+          color: const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Expanded(flex: 2, child: _headerCell('Strings')),
             Expanded(flex: 3, child: _headerCell('Type')),
-            if (isMultiScale) Expanded(flex: 2, child: _headerCell('Scale')),
+            if (showScale) Expanded(flex: 2, child: _headerCell('Scale')),
             Expanded(flex: 2, child: _headerCell('Gauge')),
             Expanded(flex: 2, child: _headerCell('Tension')),
           ],
@@ -493,18 +463,33 @@ class _CalculateScreenState extends State<CalculateScreen> {
     );
   }
 
-  Widget _headerCell(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: Color(0xFF8B8B9E),
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-    ),
-    textAlign: TextAlign.center,
-  );
+  Widget _headerCell(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Color(0xFF8B8B9E),
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
 
-  Widget _buildStringRow(int index) {
-    final s = strings[index];
+  Widget _buildStringRow({
+    required String name,
+    required int index,
+    required String gauge,
+    required bool isWound,
+    required double tension,
+    required bool showScale,
+    required double scale,
+    required VoidCallback onScaleUp,
+    required VoidCallback onScaleDown,
+    required VoidCallback onGaugeUp,
+    required VoidCallback onGaugeDown,
+    required VoidCallback onTypePlain,
+    required VoidCallback onTypeWound,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -515,11 +500,10 @@ class _CalculateScreenState extends State<CalculateScreen> {
       ),
       child: Row(
         children: [
-          // String name
           Expanded(
             flex: 2,
             child: Text(
-              s['name'],
+              name,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -528,38 +512,25 @@ class _CalculateScreenState extends State<CalculateScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-          // Type P/W buttons
           Expanded(
             flex: 3,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _typeBtn(
-                  'P',
-                  s['type'] == 'P',
-                  () => setState(() => strings[index]['type'] = 'P'),
-                ),
+                _typeBtn('P', !isWound, onTypePlain),
                 const SizedBox(width: 6),
-                _typeBtn(
-                  'W',
-                  s['type'] == 'W',
-                  () => setState(() => strings[index]['type'] = 'W'),
-                ),
+                _typeBtn('W', isWound, onTypeWound),
               ],
             ),
           ),
-          // Scale (multi-scale only)
-          if (isMultiScale)
+          if (showScale)
             Expanded(
               flex: 2,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: () => setState(
-                      () => strings[index]['scale'] =
-                          (strings[index]['scale'] as double) + 0.5,
-                    ),
+                    onTap: onScaleUp,
                     child: const Icon(
                       Icons.keyboard_arrow_up,
                       color: Colors.white,
@@ -567,7 +538,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     ),
                   ),
                   Text(
-                    '${(strings[index]['scale'] as double).toStringAsFixed(1)}"',
+                    '${scale.toStringAsFixed(1)}"',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
@@ -576,10 +547,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     textAlign: TextAlign.center,
                   ),
                   GestureDetector(
-                    onTap: () => setState(() {
-                      double cur = strings[index]['scale'] as double;
-                      if (cur > 24.0) strings[index]['scale'] = cur - 0.5;
-                    }),
+                    onTap: onScaleDown,
                     child: const Icon(
                       Icons.keyboard_arrow_down,
                       color: Colors.white,
@@ -589,17 +557,13 @@ class _CalculateScreenState extends State<CalculateScreen> {
                 ],
               ),
             ),
-          // Gauge with up/down arrows
           Expanded(
             flex: 2,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () => setState(
-                    () => strings[index]['gauge'] =
-                        (strings[index]['gauge'] as int) + 1,
-                  ),
+                  onTap: onGaugeUp,
                   child: const Icon(
                     Icons.keyboard_arrow_up,
                     color: Colors.white,
@@ -607,7 +571,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                   ),
                 ),
                 Text(
-                  _formatGauge(s['gauge'] as int),
+                  gauge,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -616,10 +580,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                   textAlign: TextAlign.center,
                 ),
                 GestureDetector(
-                  onTap: () => setState(() {
-                    int g = strings[index]['gauge'] as int;
-                    if (g > 1) strings[index]['gauge'] = g - 1;
-                  }),
+                  onTap: onGaugeDown,
                   child: const Icon(
                     Icons.keyboard_arrow_down,
                     color: Colors.white,
@@ -629,7 +590,6 @@ class _CalculateScreenState extends State<CalculateScreen> {
               ],
             ),
           ),
-          // Tension
           Expanded(
             flex: 2,
             child: Container(
@@ -643,10 +603,10 @@ class _CalculateScreenState extends State<CalculateScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    s['tension'],
+                    '${tension.toStringAsFixed(1)} lbs',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -698,9 +658,6 @@ class _CalculateScreenState extends State<CalculateScreen> {
     );
   }
 
-
-
-
   Widget _buildBottomSheet({
     required List<String> items,
     required ValueChanged<String> onSelect,
@@ -734,7 +691,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: items.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   const Divider(color: Color(0xFF2A2F45), height: 1),
               itemBuilder: (_, i) => ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -755,6 +712,4 @@ class _CalculateScreenState extends State<CalculateScreen> {
       ),
     );
   }
-
-
 }

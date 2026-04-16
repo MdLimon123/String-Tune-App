@@ -2,8 +2,9 @@ import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/core/utils/custom_switch.dart';
 import 'package:demo_project/app/features/buildSetup/view/recommended_setup_page.dart';
+import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/route_manager.dart';
+import 'package:get/get.dart';
 
 class BuildSetupPage extends StatefulWidget {
   const BuildSetupPage({super.key});
@@ -13,57 +14,13 @@ class BuildSetupPage extends StatefulWidget {
 }
 
 class _BuildSetupPageState extends State<BuildSetupPage> {
-  bool isMultiScale = false;
-  bool isGuitar = true;
-  int numberOfStrings = 6;
-  double scaleLength = 25.5;
+  final c = Get.find<TuningWorkbenchController>();
+
   bool showTuningDropdown = false;
   bool showStringTypeDropdown = false;
-  String selectedTuning = 'Browse Tuning Library';
-  String selectedStringType = 'Selected String Type';
 
-
-
-  final List<String> tuningOptions = [
-    'E Standard',
-    'Eb Standard',
-    'D Standard',
-    'C# Standard',
-    'C Standard',
-    'B Standard',
-    'A# Standard',
-    'A Standard',
-    'G# Standard',
-    'F Standard',
-    'Drop D',
-    'Drop C#',
-    'Drop C',
-    'Drop B',
-    'Drop A#',
-    'Drop A',
-    'Drop G#',
-    'Drop G',
-    'Drop F#',
-    'Drop F',
-    'Open E',
-    'Open D',
-    'Open C',
-    'Open G',
-    'Open A',
-  ];
-
-  final List<String> stringTypeOptions = [
-    'Nickel-Wound',
-    'Nickel-Plated Steel',
-    'Stainless Steel',
-    'Half Wound',
-    'Flatwound',
-  ];
-
-  String _selected = 'tight';
-
-  final List<Map<String, String>> _options = [
-    {'value': 'loose', 'label': 'Loose & Slugdy'},
+  final List<Map<String, String>> _options = const [
+    {'value': 'loose', 'label': 'Loose & Sludgy'},
     {'value': 'balanced', 'label': 'Balanced'},
     {'value': 'tight', 'label': 'Tight & Precise'},
   ];
@@ -71,170 +28,174 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: "Build Setup"),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(child: _label('Instrument')),
-                const SizedBox(height: 10),
-                Center(child: _buildInstrumentToggle()),
-                const SizedBox(height: 24),
+      appBar: CustomAppbar(title: 'Build Setup'),
+      body: GetBuilder<TuningWorkbenchController>(
+        builder: (_) {
+          final isGuitar = c.buildInstrument == 'guitar';
 
-                Center(child: _label('Number of Strings')),
-                const SizedBox(height: 10),
-                Center(
-                  child: _buildCounter(
-                    value: numberOfStrings.toString(),
-                    onDecrement: () => setState(() {
-                      if (numberOfStrings > 4) numberOfStrings--;
-                    }),
-                    onIncrement: () => setState(() {
-                      if (numberOfStrings < 12) numberOfStrings++;
-                    }),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                Center(child: _label('Scale Length')),
-                const SizedBox(height: 10),
-                Center(
-                  child: _buildCounter(
-                    value: '${scaleLength.toStringAsFixed(1)}"',
-                    onDecrement: () => setState(() {
-                      if (scaleLength > 24.0) scaleLength -= 0.5;
-                    }),
-                    onIncrement: () => setState(() {
-                      if (scaleLength < 30.0) scaleLength += 0.5;
-                    }),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomSwitch(
-                      value: isMultiScale,
-                      onChanged: (value) =>
-                          setState(() => isMultiScale = value),
+                    Center(child: _label('Instrument')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildInstrumentToggle(
+                        isGuitar: isGuitar,
+                        onGuitar: () => c.setBuildInstrument(true),
+                        onBass: () => c.setBuildInstrument(false),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Center(child: _label('Number of Strings')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildCounter(
+                        value: c.buildStringCount.toString(),
+                        onDecrement: () => c.setBuildStringCount(c.buildStringCount - 1),
+                        onIncrement: () => c.setBuildStringCount(c.buildStringCount + 1),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Center(child: _label('Scale Length')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildCounter(
+                        value: '${c.buildSingleScale.toStringAsFixed(1)}"',
+                        onDecrement: () => c.setBuildSingleScale((c.buildSingleScale - 0.5).clamp(24.0, 36.0)),
+                        onIncrement: () => c.setBuildSingleScale((c.buildSingleScale + 0.5).clamp(24.0, 36.0)),
+                      ),
                     ),
 
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Multi-Scale Instrument',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomSwitch(
+                          value: c.buildMultiScale,
+                          onChanged: c.setBuildMultiScale,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Multi-Scale Instrument',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    _label('String Type'),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        showStringTypeDropdown = true;
+                        showTuningDropdown = false;
+                      }),
+                      child: _buildDropdown(c.resolveStringTypeLabel(c.stringType)),
+                    ),
+                    const SizedBox(height: 24),
+
+                    _label('Current Tuning'),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        showTuningDropdown = true;
+                        showStringTypeDropdown = false;
+                      }),
+                      child: _buildDropdown(c.resolveTuningLabel(c.buildTuning)),
+                    ),
+                    const SizedBox(height: 24),
+
+                    _label('PLAYING STYLE'),
+                    const SizedBox(height: 8),
+                    ..._options.map(
+                      (opt) => _OptionCard(
+                        label: opt['label']!,
+                        value: opt['value']!,
+                        isSelected: c.buildFeelId == opt['value'],
+                        onTap: () => c.setBuildFeel(opt['value']!),
                       ),
+                    ),
+
+                    const SizedBox(height: 32),
+                    CustomButton(
+                      onTap: () {
+                        c.generateBuild();
+                        if (c.buildResult != null) {
+                          Get.to(() => const RecommendedSetupPage());
+                        }
+                      },
+                      text: 'Generate Setup',
                     ),
                   ],
                 ),
-                SizedBox(height: 24),
-                _label('String Type'),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    showStringTypeDropdown = true;
-                    showTuningDropdown = false;
-                  }),
-                  child: _buildDropdown(selectedStringType),
-                ),
-                const SizedBox(height: 24),
-
-                _label('Current Tuning'),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    showTuningDropdown = true;
-                    showStringTypeDropdown = false;
-                  }),
-                  child: _buildDropdown(selectedTuning),
-                ),
-                const SizedBox(height: 24),
-                _label('PLAYING STYLE'),
-                SizedBox(height: 8),
-
-                ..._options.map(
-                  (opt) => _OptionCard(
-                    label: opt['label']!,
-                    value: opt['value']!,
-                    isSelected: _selected == opt['value'],
-                    onTap: () => setState(() => _selected = opt['value']!),
+              ),
+              if (showTuningDropdown || showStringTypeDropdown)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () => setState(() {
+                      showTuningDropdown = false;
+                      showStringTypeDropdown = false;
+                    }),
+                    child: Container(color: Colors.black.withValues(alpha: 0.3)),
                   ),
                 ),
-
-                SizedBox(height: 32),
-                CustomButton(
-                  onTap: () {
-                    Get.to(
-                      () => RecommendedSetupPage(isMultiScale: isMultiScale,
-                      isGuitar: isGuitar,),
-                    );
-                  },
-                  text: "Generate Setup",
+              if (showTuningDropdown)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildBottomSheet(
+                    items: c.tuningLabels,
+                    onSelect: (item) {
+                      c.setBuildTuningByLabel(item);
+                      setState(() => showTuningDropdown = false);
+                    },
+                  ),
                 ),
-              ],
-            ),
-          ),
-
-          if (showTuningDropdown || showStringTypeDropdown)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => setState(() {
-                  showTuningDropdown = false;
-                  showStringTypeDropdown = false;
-                }),
-                child: Container(color: Colors.black.withOpacity(0.3)),
-              ),
-            ),
-          if (showTuningDropdown)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildBottomSheet(
-                items: tuningOptions,
-                onSelect: (item) => setState(() {
-                  selectedTuning = item;
-                  showTuningDropdown = false;
-                }),
-              ),
-            ),
-          if (showStringTypeDropdown)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildBottomSheet(
-                items: stringTypeOptions,
-                onSelect: (item) => setState(() {
-                  selectedStringType = item;
-                  showStringTypeDropdown = false;
-                }),
-              ),
-            ),
-        ],
+              if (showStringTypeDropdown)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildBottomSheet(
+                    items: c.stringTypeLabels,
+                    onSelect: (item) {
+                      c.setStringTypeByLabel(item);
+                      setState(() => showStringTypeDropdown = false);
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _label(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: Color(0xFFFFFFFF),
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-    ),
-  );
+        text,
+        style: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
+      );
 
-  Widget _buildInstrumentToggle() {
+  Widget _buildInstrumentToggle({
+    required bool isGuitar,
+    required VoidCallback onGuitar,
+    required VoidCallback onBass,
+  }) {
     return Container(
       width: 154,
       padding: const EdgeInsets.all(4),
@@ -244,20 +205,8 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _toggleItem(
-              'Guitar',
-              isGuitar,
-              () => setState(() => isGuitar = true),
-            ),
-          ),
-          Expanded(
-            child: _toggleItem(
-              'Bass',
-              !isGuitar,
-              () => setState(() => isGuitar = false),
-            ),
-          ),
+          Expanded(child: _toggleItem('Guitar', isGuitar, onGuitar)),
+          Expanded(child: _toggleItem('Bass', !isGuitar, onBass)),
         ],
       ),
     );
@@ -319,11 +268,7 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
     );
   }
 
-  Widget _counterBtn(
-    IconData icon,
-    VoidCallback onTap, {
-    required bool isLeft,
-  }) {
+  Widget _counterBtn(IconData icon, VoidCallback onTap, {required bool isLeft}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -355,12 +300,15 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            value,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           const Icon(
@@ -382,13 +330,6 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
       decoration: const BoxDecoration(
         color: Color(0xFF15192B),
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black45,
-            blurRadius: 20,
-            offset: Offset(0, -5),
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -406,7 +347,7 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: items.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   const Divider(color: Color(0xFF2A2F45), height: 1),
               itemBuilder: (_, i) => ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -429,19 +370,18 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
   }
 }
 
-// ignore: unused_element
 class _OptionCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isSelected;
-  final VoidCallback onTap;
-
   const _OptionCard({
     required this.label,
     required this.value,
     required this.isSelected,
     required this.onTap,
   });
+
+  final String label;
+  final String value;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -467,11 +407,9 @@ class _OptionCard extends StatelessWidget {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? const Color(0xFF9333EA) : Color(0xFFF1F5F9),
+                color: isSelected ? const Color(0xFF9333EA) : const Color(0xFFF1F5F9),
                 border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF9333EA)
-                      : const Color(0xFF94A3B8),
+                  color: isSelected ? const Color(0xFF9333EA) : const Color(0xFF94A3B8),
                   width: 2,
                 ),
               ),
@@ -482,7 +420,7 @@ class _OptionCard extends StatelessWidget {
             const SizedBox(width: 14),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w400,

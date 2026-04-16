@@ -1,237 +1,220 @@
 import 'package:demo_project/app/core/theme/app_colors.dart';
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
+import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class RecommendedSetupPage extends StatefulWidget {
-  final bool isMultiScale;
-  final bool isGuitar;
-  const RecommendedSetupPage({super.key, required this.isMultiScale, required this.isGuitar});
+  const RecommendedSetupPage({super.key});
 
   @override
   State<RecommendedSetupPage> createState() => _RecommendedSetupPageState();
 }
 
 class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
-  final List<Map<String, dynamic>> guitarStrings = [
-    {
-      'name': 'e',
-      'type': 'P',
-      'gauge': 10,
-      'tension': '14.3 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'A',
-      'type': 'P',
-      'gauge': 13,
-      'tension': '18.7 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'D',
-      'type': 'P',
-      'gauge': 17,
-      'tension': '17.9 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'G',
-      'type': 'P',
-      'gauge': 26,
-      'tension': '16.8 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'B',
-      'type': 'P',
-      'gauge': 36,
-      'tension': '15.4 lbs',
-      'scale': 25.5,
-    },
-    {
-      'name': 'E',
-      'type': 'P',
-      'gauge': 46,
-      'tension': '19.2 lbs',
-      'scale': 25.5,
-    },
-  ];
-
-    final List<Map<String, dynamic>> bassStrings = [
-    {
-      'name': 'G',
-      'type': 'P',
-      'gauge': 45,
-      'tension': '14.3 lbs',
-      'scale': 34.0,
-    },
-    {
-      'name': 'D',
-      'type': 'W',
-      'gauge': 65,
-      'tension': '18.7 lbs',
-      'scale': 34.0,
-    },
-    {
-      'name': 'A',
-      'type': 'W',
-      'gauge': 85,
-      'tension': '17.9 lbs',
-      'scale': 34.0,
-    },
-    {
-      'name': 'E',
-      'type': 'P',
-      'gauge': 105,
-      'tension': '16.8 lbs',
-      'scale': 34.0,
-    },
-  ];
-
-
-
-  List<Map<String, dynamic>> get strings =>
-     widget.isGuitar ? guitarStrings : bassStrings;
-
-
-
-  String _formatGauge(int gauge) {
-    if (gauge < 10) return '.00$gauge';
-    return '.$gauge';
-  }
+  final c = Get.find<TuningWorkbenchController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppbar(title: "Recommended Setup"),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Optimized for C Standard at 25.5”",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
+      appBar: CustomAppbar(title: 'Recommended Setup'),
+      body: GetBuilder<TuningWorkbenchController>(
+        builder: (_) {
+          final result = c.buildResult;
+          if (result == null) {
+            return const Center(
+              child: Text(
+                'No generated setup found.',
+                style: TextStyle(color: Colors.white70),
               ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Recommended Gauge Set & Tension",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 12),
+            );
+          }
 
-            _buildTableHeader(),
-            const SizedBox(height: 8),
+          final total = result.tensions.fold<double>(0, (a, b) => a + b);
+          final gaugeRange = '${result.gauges.first} - ${result.gauges.last}';
 
-            // String Rows
-            ...List.generate(strings.length, (i) => _buildStringRow(i)),
-            const SizedBox(height: 24),
-
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              decoration: BoxDecoration(
-                color: Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Total Neck Tension:124.6 lbs",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    "String Type:Nickel Wound",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    "Tension Feel:Tight & Precise",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    "Gauges:.010 – .046",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 32),
-            CustomButton(onTap: () {}, text: "Save"),
-            SizedBox(height: 16),
-
-            Container(
-              width: double.infinity,
-              height: 52,
-              decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFF9333EA)),
-                borderRadius: BorderRadius.circular(53),
-              ),
-              child: Center(
-                child: Text(
-                  "Shop This Setup",
-                  style: TextStyle(
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Optimized for ${c.resolveTuningLabel(result.tuning)} at ${result.scales.first.toStringAsFixed(1)}"',
+                  style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFD8B4FE),
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
                   ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Recommended Gauge Set & Tension',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                _buildTableHeader(showScale: c.buildMultiScale),
+                const SizedBox(height: 8),
+                ...List.generate(result.gauges.length, (i) {
+                  return _buildStringRow(
+                    name: result.stringNames[i],
+                    gauge: result.gauges[i],
+                    isWound: result.wounds[i],
+                    tension: result.tensions[i],
+                    scale: result.scales[i],
+                    showScale: c.buildMultiScale,
+                  );
+                }),
+
+                const SizedBox(height: 24),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Neck Tension: ${total.toStringAsFixed(1)} lbs',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'String Type: ${c.resolveStringTypeLabel(c.stringType)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Tension Feel: ${_feelLabel(c.buildFeelId)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Gauges: $gaugeRange',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+                CustomButton(
+                  onTap: () => c.saveFromBuild(),
+                  text: 'Save',
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () {
+                    c.prepareShop(gauges: result.gauges, wounds: result.wounds);
+                    Get.toNamed(AppRoutes.shopSetup);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF9333EA)),
+                      borderRadius: BorderRadius.circular(53),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Shop This Setup',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFD8B4FE),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () async {
+                    c.loadBuildResultIntoCalculator();
+                    await Get.toNamed(AppRoutes.calculate);
+                    c.syncBuildResultFromCalculator();
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFFF6B35)),
+                      borderRadius: BorderRadius.circular(53),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Edit in Calculator',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFFF6B35),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildTableHeader() {
+  String _feelLabel(String? id) {
+    switch (id) {
+      case 'loose':
+        return 'Loose & Sludgy';
+      case 'balanced':
+        return 'Balanced';
+      case 'tight':
+        return 'Tight & Precise';
+      default:
+        return 'Balanced';
+    }
+  }
+
+  Widget _buildTableHeader({required bool showScale}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Color(0xFF0F172A),
+          color: const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Expanded(flex: 2, child: _headerCell('Strings')),
             Expanded(flex: 3, child: _headerCell('Type')),
-            if (widget.isMultiScale)
-              Expanded(flex: 2, child: _headerCell('Scale')),
+            if (showScale) Expanded(flex: 2, child: _headerCell('Scale')),
             Expanded(flex: 2, child: _headerCell('Gauge')),
             Expanded(flex: 2, child: _headerCell('Tension')),
           ],
@@ -241,17 +224,23 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
   }
 
   Widget _headerCell(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: Color(0xFF8B8B9E),
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-    ),
-    textAlign: TextAlign.center,
-  );
+        text,
+        style: const TextStyle(
+          color: Color(0xFF8B8B9E),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        textAlign: TextAlign.center,
+      );
 
-  Widget _buildStringRow(int index) {
-    final s = strings[index];
+  Widget _buildStringRow({
+    required String name,
+    required String gauge,
+    required bool isWound,
+    required double tension,
+    required double scale,
+    required bool showScale,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -262,11 +251,10 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
       ),
       child: Row(
         children: [
-          // String name
           Expanded(
             flex: 2,
             child: Text(
-              s['name'],
+              name,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -275,172 +263,56 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
               textAlign: TextAlign.center,
             ),
           ),
-          // Type P/W buttons
           Expanded(
             flex: 3,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _typeBtn(
-                  'P',
-                  s['type'] == 'P',
-                  () => setState(() => strings[index]['type'] = 'P'),
-                ),
-                const SizedBox(width: 6),
-                _typeBtn(
-                  'W',
-                  s['type'] == 'W',
-                  () => setState(() => strings[index]['type'] = 'W'),
-                ),
-              ],
+            child: Text(
+              isWound ? 'W' : 'P',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
-          // Scale (multi-scale only)
-          if (widget.isMultiScale)
+          if (showScale)
             Expanded(
               flex: 2,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () => setState(
-                      () => strings[index]['scale'] =
-                          (strings[index]['scale'] as double) + 0.5,
-                    ),
-                    child: const Icon(
-                      Icons.keyboard_arrow_up,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                  Text(
-                    '${(strings[index]['scale'] as double).toStringAsFixed(1)}"',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  GestureDetector(
-                    onTap: () => setState(() {
-                      double cur = strings[index]['scale'] as double;
-                      if (cur > 24.0) strings[index]['scale'] = cur - 0.5;
-                    }),
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                ],
+              child: Text(
+                '${scale.toStringAsFixed(1)}"',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-          // Gauge with up/down arrows
           Expanded(
             flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () => setState(
-                    () => strings[index]['gauge'] =
-                        (strings[index]['gauge'] as int) + 1,
-                  ),
-                  child: const Icon(
-                    Icons.keyboard_arrow_up,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-                Text(
-                  _formatGauge(s['gauge'] as int),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    int g = strings[index]['gauge'] as int;
-                    if (g > 1) strings[index]['gauge'] = g - 1;
-                  }),
-                  child: const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-              ],
+            child: Text(
+              gauge,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
-          // Tension
           Expanded(
             flex: 2,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1D2E),
-                borderRadius: BorderRadius.circular(14),
+            child: Text(
+              '${tension.toStringAsFixed(1)} lbs',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    s['tension'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      height: 4,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF9333EA), Color(0xFF334155)],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _typeBtn(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: selected ? const Color(0xFF9D4EDD) : const Color(0xFFF1F5F9),
-          ),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
       ),
     );
   }
