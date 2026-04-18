@@ -1,6 +1,9 @@
+import 'package:demo_project/app/core/theme/app_colors.dart';
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/core/utils/custom_switch.dart';
+import 'package:demo_project/app/core/utils/custom_text_field.dart';
+import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -14,23 +17,21 @@ class CalculateScreen extends StatefulWidget {
 }
 
 class _CalculateScreenState extends State<CalculateScreen> {
-  final c = Get.find<TuningWorkbenchController>();
-
-  bool showTuningDropdown = false;
-  bool showStringTypeDropdown = false;
+  final calc = Get.find<CalculateController>();
+  final wb = Get.find<TuningWorkbenchController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E1F),
       appBar: CustomAppbar(title: 'Calculate String Tension'),
-      body: GetBuilder<TuningWorkbenchController>(
+      body: GetBuilder<CalculateController>(
         builder: (_) {
-          final isGuitar = c.calcInstrument == 'guitar';
-          final names = c.getStringNames(
-            c.calcInstrument,
-            c.calcStringCount,
-            c.calcTuning,
+          final isGuitar = calc.instrument == 'guitar';
+          final names = wb.getStringNames(
+            calc.instrument,
+            calc.stringCount,
+            calc.tuning,
           );
 
           return Stack(
@@ -40,13 +41,19 @@ class _CalculateScreenState extends State<CalculateScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    CustomTextField(
+                      controller: calc.setupName,
+                      hintText: 'Setup Name',
+                    ),
+                    const SizedBox(height: 24),
+
                     Center(child: _label('Instrument')),
                     const SizedBox(height: 10),
                     Center(
                       child: _buildInstrumentToggle(
                         isGuitar: isGuitar,
-                        onGuitar: () => c.changeCalcInstrument(true),
-                        onBass: () => c.changeCalcInstrument(false),
+                        onGuitar: () => calc.changeInstrument(true),
+                        onBass: () => calc.changeInstrument(false),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -55,11 +62,11 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     const SizedBox(height: 10),
                     Center(
                       child: _buildCounter(
-                        value: c.calcStringCount.toString(),
+                        value: calc.stringCount.toString(),
                         onDecrement: () =>
-                            c.changeCalcStringCount(c.calcStringCount - 1),
+                            calc.changeStringCount(calc.stringCount - 1),
                         onIncrement: () =>
-                            c.changeCalcStringCount(c.calcStringCount + 1),
+                            calc.changeStringCount(calc.stringCount + 1),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -68,12 +75,12 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     const SizedBox(height: 10),
                     Center(
                       child: _buildCounter(
-                        value: '${c.calcScaleLength.toStringAsFixed(1)}"',
-                        onDecrement: () => c.setCalcScale(
-                          (c.calcScaleLength - 0.5).clamp(24.0, 36.0),
+                        value: '${calc.scaleLength.toStringAsFixed(1)}"',
+                        onDecrement: () => calc.setScaleLength(
+                          (calc.scaleLength - 0.5).clamp(24.0, 36.0),
                         ),
-                        onIncrement: () => c.setCalcScale(
-                          (c.calcScaleLength + 0.5).clamp(24.0, 36.0),
+                        onIncrement: () => calc.setScaleLength(
+                          (calc.scaleLength + 0.5).clamp(24.0, 36.0),
                         ),
                       ),
                     ),
@@ -83,8 +90,8 @@ class _CalculateScreenState extends State<CalculateScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CustomSwitch(
-                          value: c.calcMultiScale,
-                          onChanged: c.setCalcMultiScale,
+                          value: calc.multiScale,
+                          onChanged: calc.setMultiScale,
                         ),
                         const SizedBox(width: 10),
                         const Text(
@@ -102,12 +109,9 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     _label('String Type'),
                     const SizedBox(height: 10),
                     GestureDetector(
-                      onTap: () => setState(() {
-                        showStringTypeDropdown = true;
-                        showTuningDropdown = false;
-                      }),
+                      onTap: calc.openStringTypeDropdown,
                       child: _buildDropdown(
-                        c.resolveStringTypeLabel(c.stringType),
+                        calc.resolveStringTypeLabel(calc.stringType),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -115,11 +119,8 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     _label('Current Tuning'),
                     const SizedBox(height: 10),
                     GestureDetector(
-                      onTap: () => setState(() {
-                        showTuningDropdown = true;
-                        showStringTypeDropdown = false;
-                      }),
-                      child: _buildDropdown(c.resolveTuningLabel(c.calcTuning)),
+                      onTap: calc.openTuningDropdown,
+                      child: _buildDropdown(wb.resolveTuningLabel(calc.tuning)),
                     ),
                     const SizedBox(height: 24),
 
@@ -134,7 +135,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Total Neck Tension: ${c.calcTotalTension.toStringAsFixed(1)} lbs',
+                        'Total Neck Tension: ${calc.totalTension.toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -145,35 +146,35 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    _buildTableHeader(showScale: c.calcMultiScale),
+                    _buildTableHeader(showScale: calc.multiScale),
                     const SizedBox(height: 8),
 
-                    ...List.generate(c.calcStringCount, (i) {
-                      final scale = c.calcMultiScale
-                          ? c.calcStringScales[i]
-                          : c.calcScaleLength;
+                    ...List.generate(calc.stringCount, (i) {
+                      final scale = calc.multiScale
+                          ? calc.perStringScales[i]
+                          : calc.scaleLength;
                       return _buildStringRow(
                         name: names[i],
                         index: i,
-                        gauge: c.calcGauges[i],
-                        isWound: c.calcWounds[i],
-                        tension: c.calcTensions.length > i
-                            ? c.calcTensions[i]
+                        gauge: calc.gauges[i],
+                        isWound: calc.wounds[i],
+                        tension: calc.tensions.length > i
+                            ? calc.tensions[i]
                             : 0,
-                        showScale: c.calcMultiScale,
+                        showScale: calc.multiScale,
                         scale: scale,
-                        onScaleUp: () => c.setCalcStringScale(
+                        onScaleUp: () => calc.setPerStringScale(
                           i,
                           (scale + 0.5).clamp(24.0, 36.0),
                         ),
-                        onScaleDown: () => c.setCalcStringScale(
+                        onScaleDown: () => calc.setPerStringScale(
                           i,
                           (scale - 0.5).clamp(24.0, 36.0),
                         ),
-                        onGaugeUp: () => c.bumpCalcGauge(i, 1),
-                        onGaugeDown: () => c.bumpCalcGauge(i, -1),
-                        onTypePlain: () => c.toggleCalcWound(i, false),
-                        onTypeWound: () => c.toggleCalcWound(i, true),
+                        onGaugeUp: () => calc.bumpGauge(i, 1),
+                        onGaugeDown: () => calc.bumpGauge(i, -1),
+                        onTypePlain: () => calc.toggleWound(i, false),
+                        onTypeWound: () => calc.toggleWound(i, true),
                       );
                     }),
                     const SizedBox(height: 30),
@@ -187,9 +188,9 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     const SizedBox(height: 12),
                     CustomButton(
                       onTap: () {
-                        c.prepareShop(
-                          gauges: c.calcGauges,
-                          wounds: c.calcWounds,
+                        wb.prepareShop(
+                          gauges: calc.gauges,
+                          wounds: calc.wounds,
                         );
                         Get.toNamed(AppRoutes.shopSetup);
                       },
@@ -198,41 +199,39 @@ class _CalculateScreenState extends State<CalculateScreen> {
                   ],
                 ),
               ),
-              if (showTuningDropdown || showStringTypeDropdown)
+
+              if (calc.showTuningDropdown || calc.showStringTypeDropdown)
                 Positioned.fill(
                   child: GestureDetector(
-                    onTap: () => setState(() {
-                      showTuningDropdown = false;
-                      showStringTypeDropdown = false;
-                    }),
+                    onTap: calc.hideDropdownOverlays,
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
-              if (showTuningDropdown)
+              if (calc.showTuningDropdown)
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
                   child: _buildBottomSheet(
-                    items: c.tuningLabels,
+                    items: wb.tuningLabels,
                     onSelect: (item) {
-                      c.setCalcTuningByLabel(item);
-                      setState(() => showTuningDropdown = false);
+                      calc.setTuningByLabel(item);
+                      calc.closeTuningDropdown();
                     },
                   ),
                 ),
-              if (showStringTypeDropdown)
+              if (calc.showStringTypeDropdown)
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
                   child: _buildBottomSheet(
-                    items: c.stringTypeLabels,
+                    items: calc.stringTypeLabels,
                     onSelect: (item) {
-                      c.setStringTypeByLabel(item);
-                      setState(() => showStringTypeDropdown = false);
+                      calc.setStringTypeByLabel(item);
+                      calc.closeStringTypeDropdown();
                     },
                   ),
                 ),
@@ -244,24 +243,48 @@ class _CalculateScreenState extends State<CalculateScreen> {
   }
 
   Future<void> _onSaveSetupTap() async {
-    final result = await c.saveFromCalculator();
+    final result = await calc.saveSetupToServerAndLibrary();
 
-    String message;
+    late final String message;
+    late final Color snackBg;
+    late final Color snackFg;
     switch (result) {
-      case SaveSetupResult.saved:
-        message = 'Setup saved. You can find it in Library.';
-      case SaveSetupResult.duplicate:
+      case CalculateSaveResult.saved:
+        message = 'Setup saved successfully.';
+        snackBg = const Color(0xFFD1FAE5);
+        snackFg = const Color(0xFF065F46);
+      case CalculateSaveResult.duplicate:
         message = 'This setup is already saved.';
-      case SaveSetupResult.invalid:
+        snackBg = const Color(0xFFEDE9FE);
+        snackFg = const Color(0xFF5B21B6);
+      case CalculateSaveResult.invalid:
         message = 'Unable to save this setup. Please check inputs.';
+        snackBg = const Color(0xFFFEF3C7);
+        snackFg = const Color(0xFF92400E);
+      case CalculateSaveResult.networkError:
+        message = calc.lastSaveErrorMessage.isNotEmpty
+            ? calc.lastSaveErrorMessage
+            : 'Could not reach the server. Check your connection and try again.';
+        snackBg = const Color(0xFFFFE4E6);
+        snackFg = AppColors.error;
     }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF1A1D2E),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: snackFg,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: snackBg,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        elevation: 4,
       ),
     );
   }

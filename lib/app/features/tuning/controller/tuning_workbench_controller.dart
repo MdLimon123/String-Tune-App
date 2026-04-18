@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:demo_project/app/core/storage/storage_service.dart';
+import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
 import 'package:get/get.dart';
 
 import '../domain/tuning_data.dart';
@@ -10,17 +11,7 @@ import '../domain/tuning_models.dart';
 enum SaveSetupResult { saved, duplicate, invalid }
 
 class TuningWorkbenchController extends GetxController {
-  // Calculator state
-  String calcInstrument = 'guitar';
-  int calcStringCount = 6;
-  bool calcMultiScale = false;
-  double calcScaleLength = 25.5;
-  List<double> calcStringScales = List.filled(6, 25.5);
-  String calcTuning = 'C';
   String stringType = 'nickel';
-  List<String> calcGauges = [...defaultGuitarGauges[6]!];
-  List<bool> calcWounds = [...defaultWoundGuitar[6]!];
-  List<double> calcTensions = [];
 
   // Match state
   String srcInstrument = 'guitar';
@@ -52,9 +43,7 @@ class TuningWorkbenchController extends GetxController {
   String? buildFeelId;
   ComputedSetup? buildResult;
 
-  // Artist/library
-  String artistFilter = 'All';
-  String artistSearch = '';
+  // Artist (list/filter lives in ArtistController)
   ArtistTuningEntry? selectedArtist;
   List<String>? artistEditedGauges;
   List<bool>? artistEditedWounds;
@@ -82,31 +71,9 @@ class TuningWorkbenchController extends GetxController {
 
   List<String> get stringTypeLabels => stringTypes.map((e) => e.label).toList();
 
-  List<String> get genres {
-    final set = <String>{'All'};
-    for (final artist in artistTunings) {
-      set.add(artist.genre);
-    }
-    return set.toList();
-  }
-
-  List<ArtistTuningEntry> get filteredArtists {
-    final query = artistSearch.trim().toLowerCase();
-    return artistTunings.where((artist) {
-      final byGenre = artistFilter == 'All' || artist.genre == artistFilter;
-      final bySearch =
-          query.isEmpty ||
-          artist.name.toLowerCase().contains(query) ||
-          artist.band.toLowerCase().contains(query) ||
-          resolveTuningLabel(artist.tuning).toLowerCase().contains(query);
-      return byGenre && bySearch;
-    }).toList();
-  }
-
   @override
   void onInit() {
     super.onInit();
-    _recalcCalc();
     _recalcSrc();
     _loadSavedSetups();
   }
@@ -141,6 +108,26 @@ class TuningWorkbenchController extends GetxController {
   String resolveTuningId(String tuningLabel) {
     return tuningList.firstWhereOrNull((e) => e.label == tuningLabel)?.id ??
         'E';
+  }
+
+  /// Matches API `selected_tuning` (same format as [CalculateController] POST body).
+  String tuningIdFromSelectedTuningApi(
+    String selectedTuning,
+    String instrument,
+    int stringCount,
+  ) {
+    final target = selectedTuning.trim();
+    if (target.isEmpty) return 'E';
+    for (final def in tuningList) {
+      final names = getStringNames(instrument, stringCount, def.id);
+      final s = names.reversed.map((n) {
+        final t = n.trim();
+        if (t.isEmpty) return t;
+        return t[0].toUpperCase() + (t.length > 1 ? t.substring(1) : '');
+      }).join();
+      if (s == target) return def.id;
+    }
+    return 'E';
   }
 
   String resolveStringTypeId(String label) {
@@ -213,76 +200,45 @@ class TuningWorkbenchController extends GetxController {
     return base6;
   }
 
-  // ---------- Calculator ----------
+  /// Used by [CalculateController] for tension math without duplicating physics.
+  double computeTension({
+    required String gauge,
+    required bool wound,
+    required double scaleInches,
+    required double freqHz,
+    required double stringTypeMult,
+  }) =>
+      _calcTension(gauge, wound, scaleInches, freqHz, stringTypeMult);
 
-  void changeCalcInstrument(bool isGuitar) {
-    calcInstrument = isGuitar ? 'guitar' : 'bass';
-    calcStringCount = isGuitar ? 6 : 4;
-    calcScaleLength = isGuitar ? 25.5 : 34.0;
-    calcStringScales = List.filled(calcStringCount, calcScaleLength);
+  String bumpGaugeStep(String gauge, bool wound, int dir) =>
+      _bumpGauge(gauge, wound, dir);
 
-    final gauges = calcInstrument == 'bass'
-        ? defaultBassGauges[calcStringCount]!
-        : defaultGuitarGauges[calcStringCount]!;
-    final wounds = calcInstrument == 'bass'
-        ? defaultWoundBass[calcStringCount]!
-        : defaultWoundGuitar[calcStringCount]!;
+  String snapGaugeStep(String gauge, bool wound) => _nearestStep(gauge, wound);
 
-    calcGauges = [...gauges];
-    calcWounds = [...wounds];
-    _recalcCalc();
-    update();
+  ({List<String> values, List<bool> wounds}) parseArtistGaugeRows(
+    List<String> gauges,
+  ) {
+    final p = _parseArtistGauges(gauges);
+    return (values: p.values, wounds: p.wounds);
   }
 
-  void changeCalcStringCount(int value) {
-    if (calcInstrument == 'guitar') {
-      calcStringCount = value.clamp(6, 8);
-    } else {
-      calcStringCount = value.clamp(4, 6);
-    }
-
-    calcStringScales = List.filled(calcStringCount, calcScaleLength);
-    final gauges = calcInstrument == 'bass'
-        ? defaultBassGauges[calcStringCount]!
-        : defaultGuitarGauges[calcStringCount]!;
-    final wounds = calcInstrument == 'bass'
-        ? defaultWoundBass[calcStringCount]!
-        : defaultWoundGuitar[calcStringCount]!;
-
-    calcGauges = [...gauges];
-    calcWounds = [...wounds];
-    _recalcCalc();
-    update();
-  }
-
-  void setCalcScale(double scale) {
-    calcScaleLength = scale;
-    _recalcCalc();
-    update();
-  }
-
-  void setCalcStringScale(int index, double scale) {
-    if (index >= calcStringScales.length) return;
-    calcStringScales[index] = scale;
-    _recalcCalc();
-    update();
-  }
-
-  void setCalcMultiScale(bool value) {
-    calcMultiScale = value;
-    _recalcCalc();
-    update();
-  }
-
-  void setCalcTuningByLabel(String label) {
-    calcTuning = resolveTuningId(label);
-    _recalcCalc();
-    update();
+  void _syncMatchSrcFromCalculator() {
+    final c = Get.find<CalculateController>();
+    srcInstrument = c.instrument;
+    srcStringCount = c.stringCount;
+    srcGauges = [...c.gauges];
+    srcWounds = [...c.wounds];
+    srcTuning = c.tuning;
+    srcScale = c.scaleLength;
+    srcScales = List.generate(
+      c.stringCount,
+      (i) => i < c.perStringScales.length ? c.perStringScales[i] : c.scaleLength,
+    );
+    srcMultiScale = c.multiScale;
   }
 
   void setStringTypeByLabel(String label) {
     stringType = resolveStringTypeId(label);
-    _recalcCalc();
     _recalcSrc();
     _recalcTgt();
     if (buildResult != null) {
@@ -290,41 +246,6 @@ class TuningWorkbenchController extends GetxController {
     }
     update();
   }
-
-  void bumpCalcGauge(int index, int dir) {
-    if (index >= calcGauges.length) return;
-    calcGauges[index] = _bumpGauge(calcGauges[index], calcWounds[index], dir);
-    _recalcCalc();
-    update();
-  }
-
-  void toggleCalcWound(int index, bool wound) {
-    if (index >= calcWounds.length) return;
-    calcWounds[index] = wound;
-    calcGauges[index] = _nearestStep(calcGauges[index], wound);
-    _recalcCalc();
-    update();
-  }
-
-  void _recalcCalc() {
-    final freqs = getStringFreqs(calcInstrument, calcStringCount, calcTuning);
-    final scales = calcMultiScale
-        ? calcStringScales.take(calcStringCount).toList()
-        : List.filled(calcStringCount, calcScaleLength);
-
-    calcTensions = List.generate(calcStringCount, (i) {
-      return _calcTension(
-        calcGauges[i],
-        calcWounds[i],
-        scales[i],
-        freqs[i],
-        stringTypeMult,
-      );
-    });
-  }
-
-  double get calcTotalTension =>
-      calcTensions.fold<double>(0.0, (a, b) => a + b);
 
   // ---------- Match ----------
 
@@ -636,48 +557,38 @@ class TuningWorkbenchController extends GetxController {
     final result = buildResult;
     if (result == null) return;
 
-    calcInstrument = result.instrument;
-    calcStringCount = result.stringCount;
-    calcGauges = [...result.gauges];
-    calcWounds = [...result.wounds];
-    calcTuning = result.tuning;
-
-    final allSameScale = result.scales.every(
-      (s) => (s - result.scales.first).abs() < 0.001,
-    );
-    calcMultiScale = !allSameScale;
-    calcScaleLength = result.scales.first;
-    calcStringScales = [...result.scales];
-
-    _recalcCalc();
+    final calc = Get.find<CalculateController>();
+    calc.stringType = stringType;
+    calc.applyFromBuildResult(result);
     update();
   }
 
   void syncBuildResultFromCalculator() {
-    final scales = calcMultiScale
-        ? calcStringScales.take(calcStringCount).toList()
-        : List.filled(calcStringCount, calcScaleLength);
+    final c = Get.find<CalculateController>();
+    final scales = c.multiScale
+        ? c.perStringScales.take(c.stringCount).toList()
+        : List.filled(c.stringCount, c.scaleLength);
 
-    final gauges = calcGauges.take(calcStringCount).toList();
-    final wounds = calcWounds.take(calcStringCount).toList();
-    final tensions = calcTensions.take(calcStringCount).toList();
+    final gauges = c.gauges.take(c.stringCount).toList();
+    final wounds = c.wounds.take(c.stringCount).toList();
+    final tensions = c.tensions.take(c.stringCount).toList();
 
-    buildInstrument = calcInstrument;
-    buildStringCount = calcStringCount;
-    buildTuning = calcTuning;
-    buildMultiScale = calcMultiScale;
-    buildSingleScale = calcScaleLength;
+    buildInstrument = c.instrument;
+    buildStringCount = c.stringCount;
+    buildTuning = c.tuning;
+    buildMultiScale = c.multiScale;
+    buildSingleScale = c.scaleLength;
     buildScales = [...scales];
 
     buildResult = ComputedSetup(
-      instrument: calcInstrument,
-      stringCount: calcStringCount,
-      tuning: calcTuning,
+      instrument: c.instrument,
+      stringCount: c.stringCount,
+      tuning: c.tuning,
       gauges: gauges,
       wounds: wounds,
       tensions: tensions,
       scales: scales,
-      stringNames: getStringNames(calcInstrument, calcStringCount, calcTuning),
+      stringNames: getStringNames(c.instrument, c.stringCount, c.tuning),
     );
 
     final avg = tensions.isEmpty
@@ -704,50 +615,39 @@ class TuningWorkbenchController extends GetxController {
     final singleScale = hasMatchedResult ? tgtScale : srcScale;
     final scales = hasMatchedResult ? tgtScales : srcScales;
 
-    calcInstrument = srcInstrument;
-    calcStringCount = count;
-    calcGauges = gauges.take(count).toList();
-    calcWounds = wounds.take(count).toList();
-    calcTuning = tuning;
-    calcMultiScale = multiScale;
-    calcScaleLength = singleScale;
-    calcStringScales = multiScale
-        ? scales.take(count).toList()
-        : List.filled(count, singleScale);
-
-    _recalcCalc();
+    Get.find<CalculateController>().applyFromMatchResult(
+      srcInstrument: srcInstrument,
+      count: count,
+      gaugeList: gauges,
+      woundList: wounds,
+      tuningId: tuning,
+      multi: multiScale,
+      singleScale: singleScale,
+      scaleList: scales,
+    );
     update();
   }
 
   void syncMatchResultFromCalculator() {
-    final count = calcStringCount;
-    final scales = calcMultiScale
-        ? calcStringScales.take(count).toList()
-        : List.filled(count, calcScaleLength);
+    final c = Get.find<CalculateController>();
+    final count = c.stringCount;
+    final scales = c.multiScale
+        ? c.perStringScales.take(count).toList()
+        : List.filled(count, c.scaleLength);
 
-    tgtTuning = calcTuning;
-    tgtMultiScale = calcMultiScale;
-    tgtScale = calcScaleLength;
+    tgtTuning = c.tuning;
+    tgtMultiScale = c.multiScale;
+    tgtScale = c.scaleLength;
     tgtScales = [...scales];
-    tgtGauges = calcGauges.take(count).toList();
-    tgtWounds = calcWounds.take(count).toList();
-    tgtTensions = calcTensions.take(count).toList();
+    tgtGauges = c.gauges.take(count).toList();
+    tgtWounds = c.wounds.take(count).toList();
+    tgtTensions = c.tensions.take(count).toList();
     matchGenerated = true;
 
     update();
   }
 
   // ---------- Artist ----------
-
-  void setArtistFilter(String value) {
-    artistFilter = value;
-    update();
-  }
-
-  void setArtistSearch(String value) {
-    artistSearch = value;
-    update();
-  }
 
   void loadArtist(ArtistTuningEntry artist) {
     selectedArtist = artist;
@@ -758,19 +658,33 @@ class TuningWorkbenchController extends GetxController {
     artistEditedTuning = null;
     artistEditedInstrument = null;
 
-    final parsed = _parseArtistGauges(artist.gauges);
-    calcInstrument = artist.instrument == 'bass' ? 'bass' : 'guitar';
-    calcStringCount = parsed.values.length;
-    calcGauges = parsed.values;
-    calcWounds = parsed.wounds;
-    calcScaleLength = artist.scaleLength;
-    calcStringScales = List.filled(calcStringCount, calcScaleLength);
-    calcTuning = tuningList.any((t) => t.id == artist.tuning)
+    final parsed = parseArtistGaugeRows(artist.gauges);
+    final inst = artist.instrument == 'bass' ? 'bass' : 'guitar';
+    final count = parsed.values.length;
+    final tuningId = tuningList.any((t) => t.id == artist.tuning)
         ? artist.tuning
         : 'E';
-    calcMultiScale = false;
 
-    _recalcCalc();
+    if (artist.perStringScales != null &&
+        artist.perStringScales!.length == count) {
+      Get.find<CalculateController>().applyFromArtistEdited(
+        inst: inst,
+        count: count,
+        gaugeVals: [...parsed.values],
+        woundVals: [...parsed.wounds],
+        tuningId: tuningId,
+        scales: [...artist.perStringScales!],
+      );
+    } else {
+      Get.find<CalculateController>().applyFromArtistParsed(
+        inst: inst,
+        count: count,
+        gaugeVals: [...parsed.values],
+        woundVals: [...parsed.wounds],
+        scale: artist.scaleLength,
+        tuningId: tuningId,
+      );
+    }
     update();
   }
 
@@ -788,34 +702,45 @@ class TuningWorkbenchController extends GetxController {
 
     if (artistHasEditedSetup) {
       final editedCount = artistEditedGauges!.length;
-      calcInstrument = artistEditedInstrument!;
-      calcStringCount = editedCount;
-      calcGauges = [...artistEditedGauges!];
-      calcWounds = [...artistEditedWounds!];
-      calcTuning = artistEditedTuning!;
-      final allSameScale = artistEditedScales!.every(
-        (s) => (s - artistEditedScales!.first).abs() < 0.001,
+      Get.find<CalculateController>().applyFromArtistEdited(
+        inst: artistEditedInstrument!,
+        count: editedCount,
+        gaugeVals: [...artistEditedGauges!],
+        woundVals: [...artistEditedWounds!],
+        tuningId: artistEditedTuning!,
+        scales: [...artistEditedScales!],
       );
-      calcMultiScale = !allSameScale;
-      calcScaleLength = artistEditedScales!.first;
-      calcStringScales = [...artistEditedScales!];
-      _recalcCalc();
       update();
       return;
     }
 
-    final parsed = _parseArtistGauges(artist.gauges);
-    calcInstrument = artist.instrument == 'bass' ? 'bass' : 'guitar';
-    calcStringCount = parsed.values.length;
-    calcGauges = [...parsed.values];
-    calcWounds = [...parsed.wounds];
-    calcTuning = tuningList.any((t) => t.id == artist.tuning)
+    final parsed = parseArtistGaugeRows(artist.gauges);
+    final inst = artist.instrument == 'bass' ? 'bass' : 'guitar';
+    final count = parsed.values.length;
+    final tuningId = tuningList.any((t) => t.id == artist.tuning)
         ? artist.tuning
         : 'E';
-    calcScaleLength = artist.scaleLength;
-    calcMultiScale = false;
-    calcStringScales = List.filled(calcStringCount, calcScaleLength);
-    _recalcCalc();
+
+    if (artist.perStringScales != null &&
+        artist.perStringScales!.length == count) {
+      Get.find<CalculateController>().applyFromArtistEdited(
+        inst: inst,
+        count: count,
+        gaugeVals: [...parsed.values],
+        woundVals: [...parsed.wounds],
+        tuningId: tuningId,
+        scales: [...artist.perStringScales!],
+      );
+    } else {
+      Get.find<CalculateController>().applyFromArtistParsed(
+        inst: inst,
+        count: count,
+        gaugeVals: [...parsed.values],
+        woundVals: [...parsed.wounds],
+        scale: artist.scaleLength,
+        tuningId: tuningId,
+      );
+    }
     update();
   }
 
@@ -823,16 +748,17 @@ class TuningWorkbenchController extends GetxController {
     final artist = selectedArtist;
     if (artist == null) return;
 
-    final count = calcStringCount;
-    final scales = calcMultiScale
-        ? calcStringScales.take(count).toList()
-        : List.filled(count, calcScaleLength);
+    final c = Get.find<CalculateController>();
+    final count = c.stringCount;
+    final scales = c.multiScale
+        ? c.perStringScales.take(count).toList()
+        : List.filled(count, c.scaleLength);
 
-    artistEditedInstrument = calcInstrument;
-    artistEditedTuning = calcTuning;
-    artistEditedGauges = calcGauges.take(count).toList();
-    artistEditedWounds = calcWounds.take(count).toList();
-    artistEditedTensions = calcTensions.take(count).toList();
+    artistEditedInstrument = c.instrument;
+    artistEditedTuning = c.tuning;
+    artistEditedGauges = c.gauges.take(count).toList();
+    artistEditedWounds = c.wounds.take(count).toList();
+    artistEditedTensions = c.tensions.take(count).toList();
     artistEditedScales = scales;
     update();
   }
@@ -847,10 +773,14 @@ class TuningWorkbenchController extends GetxController {
     );
 
     return List.generate(parsed.values.length, (i) {
+      final scale = artist.perStringScales != null &&
+              i < artist.perStringScales!.length
+          ? artist.perStringScales![i]
+          : artist.scaleLength;
       return _calcTension(
         parsed.values[i],
         parsed.wounds[i],
-        artist.scaleLength,
+        scale,
         freqs[i],
         stringTypeMult,
       );
@@ -859,28 +789,55 @@ class TuningWorkbenchController extends GetxController {
 
   // ---------- Save/load ----------
 
-  Future<SaveSetupResult> saveFromCalculator([String? customName]) async {
-    return _saveSetup(
-      name: customName,
-      instrument: calcInstrument,
-      stringCount: calcStringCount,
-      gauges: calcGauges,
-      wounds: calcWounds,
-      scale: calcMultiScale
-          ? calcStringScales
-                .take(calcStringCount)
-                .map((s) => s.toStringAsFixed(2))
-                .join(',')
-          : calcScaleLength.toStringAsFixed(2),
-      tuning: calcTuning,
+  String normalizeScaleString(String scale) => _normalizeScaleString(scale);
+
+  bool validateSetupPayload({
+    required int stringCount,
+    required List<String> gauges,
+    required List<bool> wounds,
+    required String scale,
+  }) {
+    return _isValidSetupPayload(
+      stringCount: stringCount,
+      gauges: gauges,
+      wounds: wounds,
+      scale: scale,
     );
+  }
+
+  bool isSavedSetupDuplicate({
+    required String instrument,
+    required int stringCount,
+    required List<String> cleanGauges,
+    required List<bool> cleanWounds,
+    required String normalizedScale,
+    required String tuning,
+  }) {
+    return savedSetups.any((existing) {
+      return _buildSetupFingerprint(
+            instrument: existing.instrument,
+            stringCount: existing.stringCount,
+            gauges: existing.gauges,
+            wounds: existing.woundFlags,
+            scale: existing.scaleLength,
+            tuning: existing.tuning,
+          ) ==
+          _buildSetupFingerprint(
+            instrument: instrument,
+            stringCount: stringCount,
+            gauges: cleanGauges,
+            wounds: cleanWounds,
+            scale: normalizedScale,
+            tuning: tuning,
+          );
+    });
   }
 
   Future<SaveSetupResult> saveFromBuild([String? customName]) async {
     final result = buildResult;
     if (result == null) return SaveSetupResult.invalid;
 
-    return _saveSetup(
+    return saveSetupToLibrary(
       name: customName,
       instrument: result.instrument,
       stringCount: result.stringCount,
@@ -897,7 +854,7 @@ class TuningWorkbenchController extends GetxController {
     final gauges = tgtGauges.isNotEmpty ? tgtGauges : srcGauges;
     final wounds = tgtGauges.isNotEmpty ? tgtWounds : srcWounds;
 
-    return _saveSetup(
+    return saveSetupToLibrary(
       name: customName,
       instrument: srcInstrument,
       stringCount: srcStringCount,
@@ -913,7 +870,7 @@ class TuningWorkbenchController extends GetxController {
     );
   }
 
-  Future<SaveSetupResult> _saveSetup({
+  Future<SaveSetupResult> saveSetupToLibrary({
     required String? name,
     required String instrument,
     required int stringCount,
@@ -1008,38 +965,9 @@ class TuningWorkbenchController extends GetxController {
   }
 
   void loadSavedSetup(SavedSetup setup) {
-    calcInstrument = setup.instrument;
-    calcStringCount = setup.stringCount;
-    calcGauges = [...setup.gauges];
-    calcWounds = [...setup.woundFlags];
-    calcTuning = setup.tuning;
-
-    final split = setup.scaleLength.split(',');
-    if (split.length > 1) {
-      calcMultiScale = true;
-      calcStringScales = split
-          .map((e) => double.tryParse(e.trim()) ?? 25.5)
-          .toList();
-      calcScaleLength = calcStringScales.isEmpty
-          ? 25.5
-          : calcStringScales.first;
-    } else {
-      calcMultiScale = false;
-      calcScaleLength = double.tryParse(setup.scaleLength) ?? 25.5;
-      calcStringScales = List.filled(calcStringCount, calcScaleLength);
-    }
-
-    srcInstrument = calcInstrument;
-    srcStringCount = calcStringCount;
-    srcGauges = [...calcGauges];
-    srcWounds = [...calcWounds];
-    srcTuning = calcTuning;
-    srcScale = calcScaleLength;
-    srcScales = [...calcStringScales];
-    srcMultiScale = calcMultiScale;
-
+    Get.find<CalculateController>().applySavedSetup(setup);
+    _syncMatchSrcFromCalculator();
     matchGenerated = false;
-    _recalcCalc();
     _recalcSrc();
     update();
   }

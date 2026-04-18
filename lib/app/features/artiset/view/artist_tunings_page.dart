@@ -1,6 +1,8 @@
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
+import 'package:demo_project/app/features/artiset/controller/artist_controller.dart';
 import 'package:demo_project/app/features/artiset/view/artist_tunings_details_page.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -13,7 +15,17 @@ class ArtistTuningsPage extends StatefulWidget {
 }
 
 class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
-  final c = Get.find<TuningWorkbenchController>();
+  final ac = Get.find<ArtistController>();
+  final wb = Get.find<TuningWorkbenchController>();
+
+  static const String _defaultCardImage = 'assets/image/1 25.png';
+
+  String _subtitleLine(ArtistTuningEntry artist) {
+    final parts = <String>[];
+    if (artist.band.isNotEmpty) parts.add(artist.band);
+    if (artist.era.isNotEmpty) parts.add(artist.era);
+    return parts.join(' · ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +34,63 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: GetBuilder<TuningWorkbenchController>(
+          child: GetBuilder<ArtistController>(
             builder: (_) {
-              final filters = c.genres;
-              final artists = c.filteredArtists;
+              final filters = ArtistController.genreFilters;
+              final artists = ac.filteredArtists;
+
+              if (ac.loading && !ac.hasLegendData && ac.errorMessage == null) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Color(0xFF9333EA),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Loading setups…',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (!ac.loading &&
+                  ac.errorMessage != null &&
+                  ac.errorMessage!.isNotEmpty &&
+                  !ac.hasLegendData) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          ac.errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () => ac.fetchLegendTunings(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
               return Column(
                 children: [
@@ -35,10 +100,10 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
-                    onChanged: c.setArtistSearch,
+                    onChanged: ac.setArtistSearch,
                     decoration: InputDecoration(
                       hint: const Text(
-                        'Search by artist, band, or tuning....',
+                        'Search by setup name, category, or tuning…',
                         style: TextStyle(
                           color: Color(0xFF64748B),
                           fontSize: 14,
@@ -71,9 +136,9 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: filters.map((label) {
-                        final isSelected = c.artistFilter == label;
+                        final isSelected = ac.artistFilter == label;
                         return GestureDetector(
-                          onTap: () => c.setArtistFilter(label),
+                          onTap: () => ac.setArtistFilter(label),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeInOut,
@@ -107,23 +172,43 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
 
                   const SizedBox(height: 16),
                   Expanded(
-                    child: ListView.separated(
-                      itemBuilder: (context, index) {
-                        final artist = artists[index];
-                        return _customContainer(
-                          title: c.resolveTuningLabel(artist.tuning),
-                          subtitle: artist.name,
-                          text: '${artist.band} - ${artist.era}',
-                          image: 'assets/image/1 25.png',
-                          tag: artist.instrument == 'bass' ? 'Bass' : 'Guitar',
-                          onTap: () {
-                            c.loadArtist(artist);
-                            Get.to(() => const ArtistTuningsDetailsPage());
-                          },
-                        );
-                      },
-                      separatorBuilder: (context, index) => const SizedBox(height: 20),
-                      itemCount: artists.length,
+                    child: RefreshIndicator(
+                      color: const Color(0xFF9333EA),
+                      onRefresh: () => ac.fetchLegendTunings(),
+                      child: artists.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                const SizedBox(height: 80),
+                                Center(
+                                  child: Text(
+                                    ac.hasLegendData
+                                        ? 'No matching setups'
+                                        : 'No setups to show',
+                                    style: const TextStyle(color: Colors.white54),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : ListView.separated(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final artist = artists[index];
+                                return _customContainer(
+                                  title: ac.resolveTuningLabel(artist.tuning),
+                                  subtitle: artist.name,
+                                  text: _subtitleLine(artist),
+                                  image: _defaultCardImage,
+                                  tag: artist.instrument == 'bass' ? 'Bass' : 'Guitar',
+                                  onTap: () {
+                                    wb.loadArtist(artist);
+                                    Get.to(() => const ArtistTuningsDetailsPage());
+                                  },
+                                );
+                              },
+                              separatorBuilder: (context, index) => const SizedBox(height: 20),
+                              itemCount: artists.length,
+                            ),
                     ),
                   ),
                 ],

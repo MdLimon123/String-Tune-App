@@ -43,8 +43,16 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
               : artist.gauges.map((g) => g.endsWith('w')).toList();
           final scales = isEdited
               ? c.artistEditedScales!
-              : List<double>.filled(gauges.length, artist.scaleLength);
-          final tensions = isEdited ? c.artistEditedTensions! : c.computeArtistTensions(artist);
+              : (artist.perStringScales != null &&
+                      artist.perStringScales!.length == gauges.length
+                  ? artist.perStringScales!
+                  : List<double>.filled(gauges.length, artist.scaleLength));
+          final tensions = isEdited
+              ? c.artistEditedTensions!
+              : (artist.apiStringTensions != null &&
+                      artist.apiStringTensions!.length == gauges.length
+                  ? artist.apiStringTensions!
+                  : c.computeArtistTensions(artist));
           final names = c.getStringNames(instrument, gauges.length, tuning);
           final total = tensions.fold<double>(0, (a, b) => a + b);
           final gaugeWithSuffix = List.generate(
@@ -90,13 +98,25 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Neck Tension: ${total.toStringAsFixed(1)} lbs',
+                        'Total neck tension: ${total.toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
+                      if (artist.totalTensionApi != null &&
+                          artist.totalTensionApi!.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'Total tension: ${artist.totalTensionApi} lbs',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       Text(
                         'Tuning: ${c.resolveTuningLabel(tuning)}',
@@ -106,9 +126,23 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                           color: Colors.white,
                         ),
                       ),
+                      if ((artist.selectedTuningRaw ?? '').isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Selected tuning: ${artist.selectedTuningRaw}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       Text(
-                        'Scale: ${scales.first.toStringAsFixed(2)}"',
+                        scales.length > 1 &&
+                                scales.toSet().length > 1
+                            ? 'Scale: ${scales.map((s) => s.toStringAsFixed(2)).join(", ")}"'
+                            : 'Scale: ${scales.first.toStringAsFixed(2)}"',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -124,15 +158,17 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        artist.notes,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white70,
+                      if (artist.notes.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          artist.notes,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white70,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

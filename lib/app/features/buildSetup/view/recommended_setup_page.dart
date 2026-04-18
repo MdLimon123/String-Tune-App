@@ -1,6 +1,7 @@
 import 'package:demo_project/app/core/theme/app_colors.dart';
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
+import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -125,7 +126,7 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
 
                 const SizedBox(height: 32),
                 CustomButton(
-                  onTap: () => c.saveFromBuild(),
+                  onTap: _onSaveSetupTap,
                   text: 'Save',
                 ),
                 const SizedBox(height: 16),
@@ -183,6 +184,55 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Future<void> _onSaveSetupTap() async {
+    c.loadBuildResultIntoCalculator();
+    final calc = Get.find<CalculateController>();
+    final result = await calc.saveSetupToServerAndLibrary();
+
+    late final String message;
+    late final Color snackBg;
+    late final Color snackFg;
+    switch (result) {
+      case CalculateSaveResult.saved:
+        message = 'Setup saved successfully.';
+        snackBg = const Color(0xFFD1FAE5);
+        snackFg = const Color(0xFF065F46);
+      case CalculateSaveResult.duplicate:
+        message = 'This setup is already saved.';
+        snackBg = const Color(0xFFEDE9FE);
+        snackFg = const Color(0xFF5B21B6);
+      case CalculateSaveResult.invalid:
+        message = 'Unable to save this setup. Please check inputs.';
+        snackBg = const Color(0xFFFEF3C7);
+        snackFg = const Color(0xFF92400E);
+      case CalculateSaveResult.networkError:
+        message = calc.lastSaveErrorMessage.isNotEmpty
+            ? calc.lastSaveErrorMessage
+            : 'Could not reach the server. Check your connection and try again.';
+        snackBg = const Color(0xFFFFE4E6);
+        snackFg = AppColors.error;
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(
+            color: snackFg,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: snackBg,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        elevation: 4,
       ),
     );
   }

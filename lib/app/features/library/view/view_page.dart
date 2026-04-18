@@ -1,4 +1,5 @@
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
+import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class ViewPage extends StatefulWidget {
 
 class _ViewPageState extends State<ViewPage> {
   final c = Get.find<TuningWorkbenchController>();
+  final calc = Get.find<CalculateController>();
 
   @override
   void initState() {
@@ -26,14 +28,14 @@ class _ViewPageState extends State<ViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppbar(title: widget.setup.name),
-      body: GetBuilder<TuningWorkbenchController>(
+      body: GetBuilder<CalculateController>(
         builder: (_) {
           final names = c.getStringNames(
-            c.calcInstrument,
-            c.calcStringCount,
-            c.calcTuning,
+            calc.instrument,
+            calc.stringCount,
+            calc.tuning,
           );
-          final total = c.calcTotalTension;
+          final total = calc.totalTension;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -63,7 +65,7 @@ class _ViewPageState extends State<ViewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Instrument: ${c.calcInstrument == 'bass' ? 'Bass' : 'Guitar'} (${c.calcStringCount} String)',
+                        'Instrument: ${calc.instrument == 'bass' ? 'Bass' : 'Guitar'} (${calc.stringCount} String)',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -72,7 +74,7 @@ class _ViewPageState extends State<ViewPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Scale Length: ${c.calcScaleLength.toStringAsFixed(1)}"',
+                        'Scale Length: ${calc.scaleLength.toStringAsFixed(1)}"',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -81,7 +83,7 @@ class _ViewPageState extends State<ViewPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Tuning: ${c.resolveTuningLabel(c.calcTuning)}',
+                        'Tuning: ${c.resolveTuningLabel(calc.tuning)}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -90,7 +92,7 @@ class _ViewPageState extends State<ViewPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Gauges: ${c.calcGauges.first} - ${c.calcGauges.last}',
+                        'Gauges: ${calc.gauges.first} - ${calc.gauges.last}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -122,10 +124,10 @@ class _ViewPageState extends State<ViewPage> {
 
                 _buildTableHeader(),
                 const SizedBox(height: 8),
-                ...List.generate(c.calcStringCount, (i) {
+                ...List.generate(calc.stringCount, (i) {
                   return _buildStringRow(
                     name: names[i],
-                    tension: c.calcTensions[i],
+                    tension: calc.tensions[i],
                   );
                 }),
               ],
