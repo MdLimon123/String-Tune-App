@@ -3,6 +3,7 @@ import 'package:demo_project/app/features/profile/view/aboutus_page.dart';
 import 'package:demo_project/app/features/profile/view/personal_info_page.dart';
 import 'package:demo_project/app/features/profile/view/privacy_police_page.dart';
 import 'package:demo_project/app/features/profile/view/terms_of_service_page.dart';
+import 'package:demo_project/app/features/profile/binding/profile_binding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -33,7 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             _customListTile(
               onTap: () {
-                Get.to(() => PersonalInfoPage());
+                Get.to(() => PersonalInfoPage(), binding: ProfileBinding());
               },
               image: "assets/icon/person.svg",
               title: 'Profile Information',

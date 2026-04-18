@@ -2,8 +2,10 @@ import 'package:demo_project/app/core/theme/app_colors.dart';
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/core/utils/custom_text_field.dart';
+import 'package:demo_project/app/features/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class PersonalInfoPage extends StatefulWidget {
   const PersonalInfoPage({super.key});
@@ -18,7 +20,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppbar(title: "Profile Information"),
-  
+
       body: Column(
         children: [
           Expanded(
@@ -28,29 +30,62 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Profile image
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage('assets/image/user.png'),
-                              fit: BoxFit.cover,
-                            ),
+                  Obx(() {
+                    final controller = Get.find<ProfileController>();
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        controller.validProfileImage == null
+                            ? Center(
+                                child: Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                        'assets/image/user.png',
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.grey.shade500
+                                    ),
+                                    image: DecorationImage(
+                                      image: FileImage(
+                                        controller.validProfileImage!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                      colorFilter: ColorFilter.mode(
+                                        Colors.black.withValues(alpha: 0.30),
+                                        BlendMode.darken,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                        Positioned(
+                          bottom: 0,
+                          right: 120,
+                          child: InkWell(
+                            onTap: () {
+                              controller.pickUserProfileImage();
+                            },
+                            child: Image.asset('assets/image/edit.png'),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 100,
-                        child: Image.asset('assets/image/edit.png'),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  }),
 
                   const SizedBox(height: 16),
                   const Text(

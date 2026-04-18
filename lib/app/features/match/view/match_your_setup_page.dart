@@ -281,7 +281,7 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                   showTuningDropdown = false;
                   showStringTypeDropdown = false;
                 }),
-                child: Container(color: Colors.black.withOpacity(0.3)),
+                child: Container(color: Colors.black.withValues(alpha:  0.3)),
               ),
             ),
           if (showTuningDropdown)
