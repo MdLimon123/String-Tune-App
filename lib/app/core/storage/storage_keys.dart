@@ -8,4 +8,6 @@ class StorageKeys {
   static const String locale = 'locale';
   static const String isFirstTime = 'is_first_time';
   static const String savedSetups = 'saved_setups';
+
+  static const String userJson = 'user_json';
 }

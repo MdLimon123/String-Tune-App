@@ -1,13 +1,14 @@
 import 'package:demo_project/app/core/theme/app_colors.dart';
+import 'package:demo_project/app/core/utils/app_snackbar.dart';
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/features/otpVerify/controller/otp_verify_controller.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OtpVerifyScreen extends StatelessWidget {
-  OtpVerifyScreen({super.key});
+  OtpVerifyScreen({super.key, required this.email});
+  final String email;
 
   final _otpVerifyController = Get.find<OtpVerifyController>();
 
@@ -72,11 +73,21 @@ class OtpVerifyScreen extends StatelessWidget {
                 ),
 
                 SizedBox(height: 32),
-                CustomButton(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.resetPassword);
-                  },
-                  text: "Verify",
+                Obx(
+                  () => CustomButton(
+                    loading: _otpVerifyController.isLoading.value,
+                    onTap: () {
+                      if (_otpVerifyController.otpCode.length == 6) {
+                        _otpVerifyController.otpVerify(
+                          email: email,
+                          otp: _otpVerifyController.otpCode,
+                        );
+                      } else {
+                        AppSnackbar.error('Please enter complete OTP');
+                      }
+                    },
+                    text: "Verify",
+                  ),
                 ),
                 SizedBox(height: 24),
                 Row(
@@ -108,6 +119,4 @@ class OtpVerifyScreen extends StatelessWidget {
       ),
     );
   }
-
-
 }

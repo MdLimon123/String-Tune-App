@@ -28,7 +28,11 @@ class _ViewPageState extends State<ViewPage> {
       appBar: CustomAppbar(title: widget.setup.name),
       body: GetBuilder<TuningWorkbenchController>(
         builder: (_) {
-          final names = c.getStringNames(c.calcInstrument, c.calcStringCount, c.calcTuning);
+          final names = c.getStringNames(
+            c.calcInstrument,
+            c.calcStringCount,
+            c.calcTuning,
+          );
           final total = c.calcTotalTension;
 
           return SingleChildScrollView(
@@ -47,7 +51,10 @@ class _ViewPageState extends State<ViewPage> {
                 const SizedBox(height: 12),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 24,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0F172A),
                     borderRadius: BorderRadius.circular(12),
@@ -57,27 +64,47 @@ class _ViewPageState extends State<ViewPage> {
                     children: [
                       Text(
                         'Instrument: ${c.calcInstrument == 'bass' ? 'Bass' : 'Guitar'} (${c.calcStringCount} String)',
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w400),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Scale Length: ${c.calcScaleLength.toStringAsFixed(1)}"',
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w400),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Tuning: ${c.resolveTuningLabel(c.calcTuning)}',
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Gauges: ${c.calcGauges.first} - ${c.calcGauges.last}',
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w400),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Total Tension: ${total.toStringAsFixed(1)} lbs',
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ],
                   ),
@@ -130,14 +157,14 @@ class _ViewPageState extends State<ViewPage> {
   }
 
   Widget _headerCell(String text) => Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF8B8B9E),
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-        textAlign: TextAlign.center,
-      );
+    text,
+    style: const TextStyle(
+      color: Color(0xFF8B8B9E),
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+    ),
+    textAlign: TextAlign.center,
+  );
 
   Widget _buildStringRow({required String name, required double tension}) {
     return Container(

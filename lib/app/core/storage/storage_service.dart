@@ -54,5 +54,12 @@ class StorageService {
     return token != null && token.isNotEmpty;
   }
 
+  String? getUserJson() => _prefs.getString(StorageKeys.userJson);
+
+  Future<void> saveUserJson(String value) =>
+      _prefs.setString(StorageKeys.userJson, value);
+
+  Future<void> removeUserJson() => _prefs.remove(StorageKeys.userJson);
+
   Future<void> clear() => _prefs.clear();
 }

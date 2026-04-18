@@ -32,12 +32,8 @@ import 'package:get/get.dart';
 
 import 'package:demo_project/app/features/login/binding/login_binding.dart';
 import 'package:demo_project/app/features/login/view/login_page.dart';
-import 'package:demo_project/app/features/products/binding/products_binding.dart';
-import 'package:demo_project/app/features/products/view/products_page.dart';
-import 'package:demo_project/app/features/user_list/binding/user_list_binding.dart';
-import 'package:demo_project/app/features/user_list/view/user_list_page.dart';
+
 import 'package:demo_project/app/routes/app_routes.dart';
-import 'package:demo_project/app/routes/auth_middleware.dart';
 
 class AppPages {
   AppPages._();
@@ -52,22 +48,22 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.signup,
-      page: () => const SignupScreen(),
+      page: () =>  SignupScreen(),
       binding: SignupBinding(),
     ),
     GetPage(
       name: AppRoutes.login,
-      page: () => const LoginPage(),
+      page: () =>  LoginPage(),
       binding: LoginBinding(),
     ),
     GetPage(
       name: AppRoutes.forget,
-      page: () => const ForgetScreen(),
+      page: () =>  ForgetScreen(),
       binding: ForgetBinding(),
     ),
     GetPage(
       name: AppRoutes.otpVerify,
-      page: () => OtpVerifyScreen(),
+      page: () => OtpVerifyScreen(email: Get.arguments['email']),
       binding: OtpVerifyBinding(),
     ),
     GetPage(
@@ -77,7 +73,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.emailVerify,
-      page: () => EmailVerifyScreen(),
+      page: () => EmailVerifyScreen(email: Get.arguments['email']),
       binding: EmailVerifyBinding(),
     ),
     GetPage(
@@ -126,17 +122,7 @@ class AppPages {
       page: () => ProfilePage(),
       binding: ProfileBinding(),
     ),
-    GetPage(
-      name: AppRoutes.userList,
-      page: () => const UserListPage(),
-      binding: UserListBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: AppRoutes.products,
-      page: () => const ProductsPage(),
-      binding: ProductsBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
+  
+ 
   ];
 }

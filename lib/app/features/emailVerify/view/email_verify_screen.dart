@@ -1,15 +1,14 @@
 import 'package:demo_project/app/core/theme/app_colors.dart';
+import 'package:demo_project/app/core/utils/app_snackbar.dart';
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/features/emailVerify/controller/email_verify_controller.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/utils.dart';
+import 'package:get/get.dart';
 
 class EmailVerifyScreen extends StatelessWidget {
-  EmailVerifyScreen({super.key});
+  final String email;
+  EmailVerifyScreen({super.key, required this.email});
 
   final _emailVerifyController = Get.find<EmailVerifyController>();
 
@@ -75,11 +74,21 @@ class EmailVerifyScreen extends StatelessWidget {
                 ),
 
                 SizedBox(height: 32),
-                CustomButton(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.bottomNavbar);
-                  },
-                  text: "Verify",
+                Obx(
+                  () => CustomButton(
+                    loading: _emailVerifyController.isLoading.value,
+                    onTap: () {
+                      if (_emailVerifyController.otpCode.length == 6) {
+                        _emailVerifyController.emailVerify(
+                          email: email,
+                          otp: _emailVerifyController.otpCode,
+                        );
+                      } else {
+                        AppSnackbar.error('Please enter complete OTP');
+                      }
+                    },
+                    text: "Verify",
+                  ),
                 ),
                 SizedBox(height: 24),
                 Row(

@@ -10,7 +10,7 @@ class EnvironmentConfig {
   static String get baseUrl {
     switch (_current) {
       case Environment.dev:
-        return 'https://unhieratic-aurore-nonanatomically.ngrok-free.dev/api/v1';
+        return 'https://5r6mdm6l-8001.inc1.devtunnels.ms/api/v1';
       case Environment.staging:
         return 'https://staging-api.example.com';
       case Environment.prod:
