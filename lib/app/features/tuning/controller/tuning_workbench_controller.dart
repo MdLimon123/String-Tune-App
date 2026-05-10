@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:demo_project/app/core/storage/storage_service.dart';
 import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../domain/tuning_data.dart';
@@ -13,6 +14,15 @@ enum SaveSetupResult { saved, duplicate, invalid }
 class TuningWorkbenchController extends GetxController {
   String stringType = 'nickel';
 
+  /// Convenience access so UI pages can edit the setup name directly.
+  /// Internally we store it in [CalculateController.setupName].
+  TextEditingController get setupName => Get.find<CalculateController>().setupName;
+
+  void setSetupName(String value) {
+    Get.find<CalculateController>().setupName.text = value;
+    update();
+  }
+
   // Match state
   String srcInstrument = 'guitar';
   int srcStringCount = 6;
@@ -20,6 +30,7 @@ class TuningWorkbenchController extends GetxController {
   double srcScale = 25.5;
   List<double> srcScales = List.filled(6, 25.5);
   String srcTuning = 'E';
+  String matchSourceSetupName = '';
   List<String> srcGauges = [...defaultGuitarGauges[6]!];
   List<bool> srcWounds = [...defaultWoundGuitar[6]!];
   List<double> srcTensions = [];
@@ -559,7 +570,10 @@ class TuningWorkbenchController extends GetxController {
 
     final calc = Get.find<CalculateController>();
     calc.stringType = stringType;
-    calc.applyFromBuildResult(result);
+    calc.applyFromBuildResult(
+      result,
+      preserveEditingId: calc.editingSetupId != null,
+    );
     update();
   }
 
@@ -606,6 +620,7 @@ class TuningWorkbenchController extends GetxController {
   }
 
   void loadMatchResultIntoCalculator() {
+    final calc = Get.find<CalculateController>();
     final hasMatchedResult = matchGenerated && tgtGauges.isNotEmpty;
     final count = hasMatchedResult ? tgtGauges.length : srcStringCount;
     final gauges = hasMatchedResult ? tgtGauges : srcGauges;
@@ -614,8 +629,11 @@ class TuningWorkbenchController extends GetxController {
     final multiScale = hasMatchedResult ? tgtMultiScale : srcMultiScale;
     final singleScale = hasMatchedResult ? tgtScale : srcScale;
     final scales = hasMatchedResult ? tgtScales : srcScales;
+    final setupNameToCarry = matchSourceSetupName.trim().isNotEmpty
+        ? matchSourceSetupName.trim()
+        : calc.setupName.text.trim();
 
-    Get.find<CalculateController>().applyFromMatchResult(
+    calc.applyFromMatchResult(
       srcInstrument: srcInstrument,
       count: count,
       gaugeList: gauges,
@@ -624,6 +642,8 @@ class TuningWorkbenchController extends GetxController {
       multi: multiScale,
       singleScale: singleScale,
       scaleList: scales,
+      setupNameText: setupNameToCarry,
+      preserveEditingId: calc.editingSetupId != null,
     );
     update();
   }
@@ -965,6 +985,7 @@ class TuningWorkbenchController extends GetxController {
   }
 
   void loadSavedSetup(SavedSetup setup) {
+    matchSourceSetupName = setup.name;
     Get.find<CalculateController>().applySavedSetup(setup);
     _syncMatchSrcFromCalculator();
     matchGenerated = false;

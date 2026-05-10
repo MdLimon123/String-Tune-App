@@ -7,10 +7,12 @@ class EnvironmentConfig {
 
   static void init(Environment env) => _current = env;
 
+
+
   static String get baseUrl {
     switch (_current) {
       case Environment.dev:
-        return 'https://5r6mdm6l-8001.inc1.devtunnels.ms/api/v1';
+        return 'http://206.162.244.182:8000/api/v1';
       case Environment.staging:
         return 'https://staging-api.example.com';
       case Environment.prod:

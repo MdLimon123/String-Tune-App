@@ -10,6 +10,8 @@ import 'package:demo_project/app/core/network/api_exception.dart';
 import 'package:demo_project/app/core/network/connectivity_service.dart';
 import 'package:demo_project/app/core/storage/storage_service.dart';
 import 'package:demo_project/app/core/utils/logger.dart';
+import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:get/get.dart';
 
 class BaseApiService {
   static final BaseApiService _instance = BaseApiService._internal();
@@ -19,6 +21,7 @@ class BaseApiService {
   final http.Client _client = http.Client();
   final StorageService _storage = StorageService();
   final ConnectivityService _connectivity = ConnectivityService();
+  bool _isHandlingUnauthorized = false;
 
   Map<String, String> get _headers {
     final headers = <String, String>{
@@ -216,6 +219,24 @@ class BaseApiService {
       return body;
     }
 
+    if (response.statusCode == 401) {
+      _handleUnauthorized();
+    }
+
     throw ApiException.fromStatusCode(response.statusCode, body);
+  }
+
+  void _handleUnauthorized() {
+    if (_isHandlingUnauthorized) return;
+    _isHandlingUnauthorized = true;
+
+    _storage.removeToken();
+    _storage.removeUserJson();
+
+    if (Get.currentRoute != AppRoutes.login) {
+      Get.offAllNamed(AppRoutes.login);
+    }
+
+    _isHandlingUnauthorized = false;
   }
 }

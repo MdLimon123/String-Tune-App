@@ -2,6 +2,7 @@ import 'package:demo_project/app/core/global/loading_controller.dart';
 import 'package:demo_project/app/core/network/api_endpoints.dart';
 import 'package:demo_project/app/core/network/api_exception.dart';
 import 'package:demo_project/app/core/network/base_api_service.dart';
+import 'package:demo_project/app/features/library/controller/library_controller.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:demo_project/app/features/tuning/domain/tuning_data.dart';
 import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
@@ -19,6 +20,7 @@ class CalculateController extends GetxController {
 
   /// Filled when [saveSetupToServerAndLibrary] returns [CalculateSaveResult.networkError].
   String lastSaveErrorMessage = '';
+  int? editingSetupId;
 
   String instrument = 'guitar';
   int stringCount = 6;
@@ -231,7 +233,35 @@ class CalculateController extends GetxController {
     });
   }
 
+  void resetForNewCalculation() {
+    setupName.clear();
+    editingSetupId = null;
+    instrument = 'guitar';
+    stringCount = 6;
+    multiScale = false;
+    scaleLength = 25.5;
+    perStringScales = List.filled(stringCount, scaleLength);
+    tuning = 'C';
+    stringType = 'nickel';
+    gauges = [...defaultGuitarGauges[6]!];
+    wounds = [...defaultWoundGuitar[6]!];
+    showTuningDropdown = false;
+    showStringTypeDropdown = false;
+    _recalcTensions();
+    update();
+  }
+
+  /// Used when opening the match screen from Home.
+  /// We must clear `PUT`/edit context, but we don't want to wipe the user's
+  /// current `setupName` (so the UI can still show it as the title).
+  void clearEditingId() {
+    editingSetupId = null;
+    update();
+  }
+
   void applySavedSetup(SavedSetup setup) {
+    editingSetupId = setup.id;
+    setupName.text = setup.name;
     instrument = setup.instrument;
     stringCount = setup.stringCount;
     gauges = [...setup.gauges];
@@ -255,7 +285,13 @@ class CalculateController extends GetxController {
     update();
   }
 
-  void applyFromBuildResult(ComputedSetup result) {
+  void applyFromBuildResult(
+    ComputedSetup result, {
+    bool preserveEditingId = false,
+  }) {
+    if (!preserveEditingId) {
+      editingSetupId = null;
+    }
     instrument = result.instrument;
     stringCount = result.stringCount;
     gauges = [...result.gauges];
@@ -282,7 +318,15 @@ class CalculateController extends GetxController {
     required bool multi,
     required double singleScale,
     required List<double> scaleList,
+    String? setupNameText,
+    bool preserveEditingId = false,
   }) {
+    if (!preserveEditingId) {
+      editingSetupId = null;
+    }
+    if (setupNameText != null && setupNameText.trim().isNotEmpty) {
+      setupName.text = setupNameText.trim();
+    }
     instrument = srcInstrument;
     stringCount = count;
     gauges = gaugeList.take(count).toList();
@@ -306,6 +350,7 @@ class CalculateController extends GetxController {
     required double scale,
     required String tuningId,
   }) {
+    editingSetupId = null;
     instrument = inst;
     stringCount = count;
     gauges = [...gaugeVals];
@@ -327,6 +372,7 @@ class CalculateController extends GetxController {
     required String tuningId,
     required List<double> scales,
   }) {
+    editingSetupId = null;
     instrument = inst;
     stringCount = count;
     gauges = [...gaugeVals];
@@ -372,7 +418,8 @@ class CalculateController extends GetxController {
     }
 
     final normalizedScale = wb.normalizeScaleString(scale);
-    if (wb.isSavedSetupDuplicate(
+    if (editingSetupId == null &&
+        wb.isSavedSetupDuplicate(
       instrument: instrument,
       stringCount: stringCount,
       cleanGauges: cleanGauges,
@@ -389,11 +436,19 @@ class CalculateController extends GetxController {
       loading.show();
       try {
         // Dev tunnels / cold starts often exceed the default 30s client timeout.
-        await _api.post(
-          ApiEndpoints.calculateStringTension,
-          body: body,
-          timeout: const Duration(seconds: 90),
-        );
+        if (editingSetupId == null) {
+          await _api.post(
+            ApiEndpoints.calculateStringTension,
+            body: body,
+            timeout: const Duration(seconds: 90),
+          );
+        } else {
+          await _api.put(
+            ApiEndpoints.calculateStringTensionEdit(editingSetupId!),
+            body: body,
+            timeout: const Duration(seconds: 90),
+          );
+        }
       } finally {
         loading.hide();
       }
@@ -403,6 +458,15 @@ class CalculateController extends GetxController {
     } catch (e) {
       lastSaveErrorMessage = e.toString();
       return CalculateSaveResult.networkError;
+    }
+
+    if (editingSetupId != null) {
+      if (Get.isRegistered<LibraryController>()) {
+        try {
+          await Get.find<LibraryController>().fetchLibrary();
+        } catch (_) {}
+      }
+      return CalculateSaveResult.saved;
     }
 
     final local = await wb.saveSetupToLibrary(

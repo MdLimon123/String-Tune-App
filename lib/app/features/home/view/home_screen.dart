@@ -1,6 +1,7 @@
+import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
 import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/route_manager.dart';
+import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -29,6 +30,7 @@ class HomeScreen extends StatelessWidget {
                   text: "Calculate string tension instantly",
                   image: 'assets/image/1 25.png',
                   onTap: () {
+                    Get.find<CalculateController>().resetForNewCalculation();
                     Get.toNamed(AppRoutes.calculate);
                   },
                 ),
@@ -40,6 +42,7 @@ class HomeScreen extends StatelessWidget {
                   text: "Keep your exact feel in any tuning",
                   image: 'assets/image/2 6.png',
                   onTap: () {
+                    Get.find<CalculateController>().clearEditingId();
                     Get.toNamed(AppRoutes.matchYourSetup);
                   },
                 ),

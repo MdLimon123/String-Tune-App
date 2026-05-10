@@ -15,6 +15,7 @@ class ImageUtils{
        source: fromCamera? ImageSource.camera : ImageSource.gallery,
      );
 
+
      if(pickedFile == null) return null;
 
      final appDir = await getApplicationDocumentsDirectory();

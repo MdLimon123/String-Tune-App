@@ -1,6 +1,7 @@
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/core/utils/custom_switch.dart';
+import 'package:demo_project/app/core/utils/custom_text_field.dart';
 import 'package:demo_project/app/features/buildSetup/view/recommended_setup_page.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,13 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
+                    CustomTextField(
+                      controller: c.setupName,
+                      hintText: 'Setup Name',
+                      onChanged: (value) => c.setSetupName(value),
+                    ),
+
                     Center(child: _label('Instrument')),
                     const SizedBox(height: 10),
                     Center(

@@ -32,6 +32,7 @@ import 'package:get/get.dart';
 
 import 'package:demo_project/app/features/login/binding/login_binding.dart';
 import 'package:demo_project/app/features/login/view/login_page.dart';
+import 'package:demo_project/app/routes/auth_middleware.dart';
 
 import 'package:demo_project/app/routes/app_routes.dart';
 
@@ -80,47 +81,56 @@ class AppPages {
       name: AppRoutes.bottomNavbar,
       page: () => BottomNavbarScreen(),
       binding: BottomNavbarBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.calculate,
       page: () => CalculateScreen(),
       binding: CalculateBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.matchYourSetup,
       page: () => MatchYourSetupPage(),
       binding: MatchYourBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.buildSetup,
       page: () => BuildSetupPage(),
       binding: BuildSetupBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.shopSetup,
       page: () => ShowSetupPage(),
       binding: ShopSetupBinding(),
+      middlewares: [AuthMiddleware()],
     ),
 
     GetPage(
       name: AppRoutes.artistTunings,
       page: () => ArtistTuningsPage(),
       binding: ArtistBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.library,
       page: () => LibraryPage(),
       binding: LibraryBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.shopPage,
       page: () => ShopPage(),
       binding: ShopBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.profilePage,
       page: () => ProfilePage(),
       binding: ProfileBinding(),
+      middlewares: [AuthMiddleware()],
     ),
   
  

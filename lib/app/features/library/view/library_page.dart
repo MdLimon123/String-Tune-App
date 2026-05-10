@@ -189,7 +189,10 @@ class _LibraryPageState extends State<LibraryPage> {
                     fill: true,
                     onTap: () {
                       wb.loadSavedSetup(setup);
-                      Get.toNamed(AppRoutes.matchYourSetup);
+                      Get.toNamed(
+                        AppRoutes.matchYourSetup,
+                        arguments: {'title': setup.name},
+                      );
                     },
                   ),
                 ),

@@ -135,7 +135,7 @@ class LoginPage extends StatelessWidget {
                       SizedBox(width: 5),
                       InkWell(
                         onTap: () {
-                          Get.toNamed(AppRoutes.signup);
+                          Get.offNamed(AppRoutes.signup);
                         },
                         child: Text(
                           " Sign Up",

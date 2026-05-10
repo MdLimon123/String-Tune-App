@@ -1,6 +1,7 @@
 import 'package:demo_project/app/core/utils/custom_appbar.dart';
 import 'package:demo_project/app/core/utils/custom_button.dart';
 import 'package:demo_project/app/core/utils/custom_switch.dart';
+import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
 import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:demo_project/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +23,25 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments;
+    final calc = Get.find<CalculateController>();
+
+    String title = 'Match Your Setup';
+    if (args is Map && args['title'] != null) {
+      title = args['title'].toString();
+    } else {
+      final fromController = c.matchSourceSetupName.trim();
+      final fromCalc = calc.setupName.text.trim();
+      if (fromController.isNotEmpty) {
+        title = fromController;
+      } else if (fromCalc.isNotEmpty) {
+        title = fromCalc;
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E1F),
-      appBar: CustomAppbar(title: 'Match Your Setup'),
+      appBar: CustomAppbar(title: title),
       body: GetBuilder<TuningWorkbenchController>(
         builder: (_) {
           final isGuitar = c.srcInstrument == 'guitar';

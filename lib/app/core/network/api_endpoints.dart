@@ -10,6 +10,9 @@ class ApiEndpoints {
 
   // Calculate
   static const String calculateStringTension = '/users/librarys/';
+
+  static  String calculateStringTensionEdit(int id) => '/users/librarys/$id/';
+  
   static const String library = '/users/librarys/';
 
   static const String getProfile = "/profiles/me/";

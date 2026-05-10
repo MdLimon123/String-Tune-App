@@ -204,7 +204,7 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
                                     wb.loadArtist(artist);
                                     Get.to(() => const ArtistTuningsDetailsPage());
                                   },
-                                );
+                                ); 
                               },
                               separatorBuilder: (context, index) => const SizedBox(height: 20),
                               itemCount: artists.length,
