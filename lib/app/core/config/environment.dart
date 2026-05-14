@@ -1,7 +1,7 @@
 enum Environment { dev, staging, prod }
 
 class EnvironmentConfig {
-  static Environment _current = Environment.dev;
+  static Environment _current = Environment.prod;
 
   static Environment get current => _current;
 
@@ -12,11 +12,11 @@ class EnvironmentConfig {
   static String get baseUrl {
     switch (_current) {
       case Environment.dev:
-        return 'http://206.162.244.182:8000/api/v1';
+        return 'http://204.197.173.73:8000/api/v1';
       case Environment.staging:
         return 'https://staging-api.example.com';
       case Environment.prod:
-        return 'https://api.example.com';
+        return 'http://204.197.173.73:8000/api/v1';
     }
   }
 

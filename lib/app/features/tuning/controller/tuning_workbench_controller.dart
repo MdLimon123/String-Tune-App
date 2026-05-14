@@ -183,12 +183,12 @@ class TuningWorkbenchController extends GetxController {
 
     if (instrument == 'bass') {
       final base = <int, List<double>>{
-        4: [196.0, 146.83, 110.0, 82.41],
-        5: [196.0, 146.83, 110.0, 82.41, 61.74],
-        6: [261.63, 196.0, 146.83, 110.0, 82.41, 61.74],
+        4: [98.00, 73.42, 55.00, 41.20],
+        5: [98.00, 73.42, 55.00, 41.20, 30.87],
+        6: [130.81, 98.00, 73.42, 55.00, 41.20, 30.87],
       };
       final semitoneOffset =
-          (12 * math.log((tuning.notes[5]) / 164.81) / math.ln2).round();
+          (12 * math.log((tuning.notes[5]) / 82.41) / math.ln2).round();
       final st = math.pow(2.0, 1 / 12).toDouble();
       return (base[stringCount] ?? base[4]!)
           .map((f) => f * math.pow(st, semitoneOffset).toDouble())

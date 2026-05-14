@@ -98,7 +98,7 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total neck tension: ${total.toStringAsFixed(1)} lbs',
+                        'Total neck tension: ${total.round()} lbs',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -319,14 +319,53 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              '${tension.toStringAsFixed(1)} lbs',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1D2E),
+                borderRadius: BorderRadius.circular(14),
               ),
-              textAlign: TextAlign.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Text(
+                      '${tension.toStringAsFixed(1)} lbs',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    height: 4,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: (tension / 25.0).clamp(0.0, 1.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: tension < 12.0
+                                ? [const Color(0xFFFF6B35), const Color(0xFFFF8C61)]
+                                : tension < 15.0
+                                    ? [const Color(0xFFFFD700), const Color(0xFFFFE066)]
+                                    : [const Color(0xFF4ADE80), const Color(0xFF86EFAC)],
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

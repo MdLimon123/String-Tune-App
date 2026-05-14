@@ -15,7 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize environment
-  EnvironmentConfig.init(Environment.dev);
+  EnvironmentConfig.init(Environment.prod);
 
   // Initialize storage
   await StorageService.init();
@@ -34,27 +34,28 @@ class MyApp extends StatelessWidget {
     final themeController = Get.find<ThemeController>();
     final localizationController = Get.find<LocalizationController>();
 
-    return Obx(() => GetMaterialApp(
-          title: 'Demo Project',
-          debugShowCheckedModeBanner: false,
+    return Obx(
+      () => GetMaterialApp(
+        title: 'Demo Project',
+        debugShowCheckedModeBanner: false,
 
-          theme: AppTheme.dark,
-          darkTheme: AppTheme.dark,
-          themeMode: themeController.themeMode,
+        theme: AppTheme.dark,
+        darkTheme: AppTheme.dark,
+        themeMode: themeController.themeMode,
 
-          // Localization
-          translations: AppTranslations(),
-          locale: localizationController.locale,
-          fallbackLocale: const Locale('en', 'US'),
+        // Localization
+        translations: AppTranslations(),
+        locale: localizationController.locale,
+        fallbackLocale: const Locale('en', 'US'),
 
-          // Routes
-          initialRoute: AppPages.initial,
-          getPages: AppPages.pages,
+        // Routes
+        initialRoute: AppPages.initial,
+        getPages: AppPages.pages,
 
-          // Loading overlay
-          builder: (context, child) => LoadingOverlay(
-            child: child ?? const SizedBox.shrink(),
-          ),
-        ));
+        // Loading overlay
+        builder: (context, child) =>
+            LoadingOverlay(child: child ?? const SizedBox.shrink()),
+      ),
+    );
   }
 }

@@ -27,19 +27,18 @@ class SignupController extends GetxController {
     try {
       final data = await _api.post(
         ApiEndpoints.register,
-        body: {
-          'full_name': name,
-          'email': email,
-          'password': password,
-        },
+        body: {'full_name': name, 'email': email, 'password': password},
       );
 
       final msg = _readMessage(data) ?? 'Success';
+      print("Error =============> $msg");
       AppSnackbar.success(msg);
       Get.toNamed(AppRoutes.emailVerify, arguments: {'email': email});
     } on ApiException catch (e) {
+      print("Error =============> $e");
       AppSnackbar.error(_apiErrorText(e));
     } catch (e) {
+      print("Error =============> $e");
       AppSnackbar.error(e.toString());
     } finally {
       isLoading.value = false;

@@ -101,7 +101,7 @@ class _ViewPageState extends State<ViewPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Total Tension: ${total.toStringAsFixed(1)} lbs',
+                        'Total Tension: ${total.round()} lbs',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -213,14 +213,26 @@ class _ViewPageState extends State<ViewPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      height: 4,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF9333EA), Color(0xFF334155)],
+                  Container(
+                    height: 4,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: (tension / 25.0).clamp(0.0, 1.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: tension < 12.0
+                                ? [const Color(0xFFFF6B35), const Color(0xFFFF8C61)]
+                                : tension < 15.0
+                                    ? [const Color(0xFFFFD700), const Color(0xFFFFE066)]
+                                    : [const Color(0xFF4ADE80), const Color(0xFF86EFAC)],
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
