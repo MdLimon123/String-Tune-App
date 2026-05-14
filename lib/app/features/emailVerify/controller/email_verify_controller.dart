@@ -1,9 +1,9 @@
-import 'package:demo_project/app/core/network/api_endpoints.dart';
-import 'package:demo_project/app/core/network/api_exception.dart';
-import 'package:demo_project/app/core/network/base_api_service.dart';
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/core/utils/app_snackbar.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/network/api_endpoints.dart';
+import 'package:does_it_doom/app/core/network/api_exception.dart';
+import 'package:does_it_doom/app/core/network/base_api_service.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/core/utils/app_snackbar.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

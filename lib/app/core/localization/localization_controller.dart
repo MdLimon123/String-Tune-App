@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:get/get.dart';
 
-import 'package:demo_project/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
 
 class LocalizationController extends GetxController {
   final _storage = StorageService();

@@ -1,4 +1,4 @@
-import 'package:demo_project/app/features/home/controller/home_controller.dart';
+import 'package:does_it_doom/app/features/home/controller/home_controller.dart';
 import 'package:get/get.dart';
 
 class HomeBinding extends Bindings{

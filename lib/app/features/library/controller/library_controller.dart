@@ -1,8 +1,8 @@
-import 'package:demo_project/app/core/network/api_endpoints.dart';
-import 'package:demo_project/app/core/network/api_exception.dart';
-import 'package:demo_project/app/core/network/base_api_service.dart';
-import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
-import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
+import 'package:does_it_doom/app/core/network/api_endpoints.dart';
+import 'package:does_it_doom/app/core/network/api_exception.dart';
+import 'package:does_it_doom/app/core/network/base_api_service.dart';
+import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
 import 'package:get/get.dart';
 
 class LibraryController extends GetxController {

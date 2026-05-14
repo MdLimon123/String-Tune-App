@@ -4,13 +4,13 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-import 'package:demo_project/app/core/config/environment.dart';
-import 'package:demo_project/app/core/constants/app_constants.dart';
-import 'package:demo_project/app/core/network/api_exception.dart';
-import 'package:demo_project/app/core/network/connectivity_service.dart';
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/core/utils/logger.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/config/environment.dart';
+import 'package:does_it_doom/app/core/constants/app_constants.dart';
+import 'package:does_it_doom/app/core/network/api_exception.dart';
+import 'package:does_it_doom/app/core/network/connectivity_service.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/core/utils/logger.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 class BaseApiService {

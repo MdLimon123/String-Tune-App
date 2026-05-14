@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
 
-import 'package:demo_project/app/core/error/error_handler.dart';
-import 'package:demo_project/app/core/global/loading_controller.dart';
-import 'package:demo_project/app/core/network/api_exception.dart';
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/error/error_handler.dart';
+import 'package:does_it_doom/app/core/global/loading_controller.dart';
+import 'package:does_it_doom/app/core/network/api_exception.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 
 abstract class BaseController extends GetxController {
   final isLoading = false.obs;

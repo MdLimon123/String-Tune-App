@@ -1,5 +1,5 @@
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/features/splash/controller/splash_controller.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/features/splash/controller/splash_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/state_manager.dart';
 

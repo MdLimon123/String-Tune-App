@@ -1,9 +1,9 @@
-import 'package:demo_project/app/core/utils/custom_appbar.dart';
-import 'package:demo_project/app/core/utils/custom_button.dart';
-import 'package:demo_project/app/core/utils/custom_switch.dart';
-import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
-import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/core/utils/custom_button.dart';
+import 'package:does_it_doom/app/core/utils/custom_switch.dart';
+import 'package:does_it_doom/app/features/calculate/controller/calculate_controller.dart';
+import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

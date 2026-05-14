@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:demo_project/app/core/config/environment.dart';
-import 'package:demo_project/app/core/global/global_bindings.dart';
-import 'package:demo_project/app/core/global/loading_overlay.dart';
-import 'package:demo_project/app/core/localization/app_translations.dart';
-import 'package:demo_project/app/core/localization/localization_controller.dart';
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/core/theme/app_theme.dart';
-import 'package:demo_project/app/core/theme/theme_controller.dart';
-import 'package:demo_project/app/routes/app_pages.dart';
+import 'package:does_it_doom/app/core/config/environment.dart';
+import 'package:does_it_doom/app/core/global/global_bindings.dart';
+import 'package:does_it_doom/app/core/global/loading_overlay.dart';
+import 'package:does_it_doom/app/core/localization/app_translations.dart';
+import 'package:does_it_doom/app/core/localization/localization_controller.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/core/theme/app_theme.dart';
+import 'package:does_it_doom/app/core/theme/theme_controller.dart';
+import 'package:does_it_doom/app/routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
 
     return Obx(
       () => GetMaterialApp(
-        title: 'Demo Project',
+        title: 'Down Tune',
         debugShowCheckedModeBanner: false,
 
         theme: AppTheme.dark,

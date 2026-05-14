@@ -1,7 +1,7 @@
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/core/utils/custom_appbar.dart';
-import 'package:demo_project/app/core/utils/custom_button.dart';
-import 'package:demo_project/app/features/library/view/generate_matched_page.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/core/utils/custom_button.dart';
+import 'package:does_it_doom/app/features/library/view/generate_matched_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 

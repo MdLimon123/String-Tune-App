@@ -1,8 +1,8 @@
-import 'package:demo_project/app/core/utils/custom_appbar.dart';
-import 'package:demo_project/app/features/artiset/controller/artist_controller.dart';
-import 'package:demo_project/app/features/artiset/view/artist_tunings_details_page.dart';
-import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
-import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
+import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/features/artiset/controller/artist_controller.dart';
+import 'package:does_it_doom/app/features/artiset/view/artist_tunings_details_page.dart';
+import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';

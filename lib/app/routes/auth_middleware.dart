@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override

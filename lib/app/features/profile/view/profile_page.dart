@@ -1,11 +1,11 @@
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/features/profile/view/aboutus_page.dart';
-import 'package:demo_project/app/features/profile/view/personal_info_page.dart';
-import 'package:demo_project/app/features/profile/view/privacy_police_page.dart';
-import 'package:demo_project/app/features/profile/view/terms_of_service_page.dart';
-import 'package:demo_project/app/features/profile/binding/profile_binding.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/features/profile/view/aboutus_page.dart';
+import 'package:does_it_doom/app/features/profile/view/personal_info_page.dart';
+import 'package:does_it_doom/app/features/profile/view/privacy_police_page.dart';
+import 'package:does_it_doom/app/features/profile/view/terms_of_service_page.dart';
+import 'package:does_it_doom/app/features/profile/binding/profile_binding.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

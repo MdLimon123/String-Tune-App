@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:demo_project/app/core/storage/storage_service.dart';
-import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
+import 'package:does_it_doom/app/core/storage/storage_service.dart';
+import 'package:does_it_doom/app/features/calculate/controller/calculate_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,7 +1,7 @@
-import 'package:demo_project/app/core/utils/custom_appbar.dart';
-import 'package:demo_project/app/features/calculate/controller/calculate_controller.dart';
-import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
-import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
+import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/features/calculate/controller/calculate_controller.dart';
+import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

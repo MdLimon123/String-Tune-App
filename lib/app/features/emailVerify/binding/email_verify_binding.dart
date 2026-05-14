@@ -1,4 +1,4 @@
-import 'package:demo_project/app/features/emailVerify/controller/email_verify_controller.dart';
+import 'package:does_it_doom/app/features/emailVerify/controller/email_verify_controller.dart';
 import 'package:get/get.dart';
 
 class EmailVerifyBinding extends Bindings{

@@ -1,5 +1,5 @@
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/features/bottomNavbar/controller/bottom_navbar_controller.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/features/bottomNavbar/controller/bottom_navbar_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';

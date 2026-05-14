@@ -1,8 +1,8 @@
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/core/utils/app_snackbar.dart';
-import 'package:demo_project/app/core/utils/custom_appbar.dart';
-import 'package:demo_project/app/core/utils/custom_button.dart';
-import 'package:demo_project/app/features/otpVerify/controller/otp_verify_controller.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/core/utils/app_snackbar.dart';
+import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/core/utils/custom_button.dart';
+import 'package:does_it_doom/app/features/otpVerify/controller/otp_verify_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,5 +1,5 @@
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
 class PrivacyPolicePage extends StatefulWidget {

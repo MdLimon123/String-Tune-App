@@ -1,6 +1,6 @@
 import 'dart:developer' as dev;
 
-import 'package:demo_project/app/core/config/environment.dart';
+import 'package:does_it_doom/app/core/config/environment.dart';
 
 class AppLogger {
   AppLogger._();

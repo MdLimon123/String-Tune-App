@@ -1,9 +1,9 @@
-import 'package:demo_project/app/core/theme/app_colors.dart';
-import 'package:demo_project/app/features/library/controller/library_controller.dart';
-import 'package:demo_project/app/features/library/view/view_page.dart';
-import 'package:demo_project/app/features/tuning/controller/tuning_workbench_controller.dart';
-import 'package:demo_project/app/features/tuning/domain/tuning_models.dart';
-import 'package:demo_project/app/routes/app_routes.dart';
+import 'package:does_it_doom/app/core/theme/app_colors.dart';
+import 'package:does_it_doom/app/features/library/controller/library_controller.dart';
+import 'package:does_it_doom/app/features/library/view/view_page.dart';
+import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
