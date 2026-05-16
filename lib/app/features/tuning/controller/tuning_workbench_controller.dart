@@ -305,6 +305,7 @@ class TuningWorkbenchController extends GetxController {
 
   void setMatchScale(double scale) {
     srcScale = scale;
+    matchGenerated = false;
     _recalcSrc();
     update();
   }
@@ -312,18 +313,21 @@ class TuningWorkbenchController extends GetxController {
   void setMatchScaleAt(int index, double scale) {
     if (index >= srcScales.length) return;
     srcScales[index] = scale;
+    matchGenerated = false;
     _recalcSrc();
     update();
   }
 
   void setMatchMultiScale(bool value) {
     srcMultiScale = value;
+    matchGenerated = false;
     _recalcSrc();
     update();
   }
 
   void setMatchTuningByLabel(String label) {
     srcTuning = resolveTuningId(label);
+    matchGenerated = false;
     _recalcSrc();
     update();
   }
@@ -345,18 +349,21 @@ class TuningWorkbenchController extends GetxController {
 
   void setTargetTuningByLabel(String label) {
     tgtTuning = resolveTuningId(label);
+    matchGenerated = false;
     _recalcTgt();
     update();
   }
 
   void setTargetScale(double value) {
     tgtScale = value;
+    matchGenerated = false;
     _recalcTgt();
     update();
   }
 
   void setTargetMultiScale(bool value) {
     tgtMultiScale = value;
+    matchGenerated = false;
     _recalcTgt();
     update();
   }
@@ -364,6 +371,7 @@ class TuningWorkbenchController extends GetxController {
   void setTargetScaleAt(int index, double scale) {
     if (index >= tgtScales.length) return;
     tgtScales[index] = scale;
+    matchGenerated = false;
     _recalcTgt();
     update();
   }
@@ -648,21 +656,23 @@ class TuningWorkbenchController extends GetxController {
     update();
   }
 
-  void syncMatchResultFromCalculator() {
+  void syncMatchSrcFromCalculator() {
     final c = Get.find<CalculateController>();
     final count = c.stringCount;
     final scales = c.multiScale
         ? c.perStringScales.take(count).toList()
         : List.filled(count, c.scaleLength);
 
-    tgtTuning = c.tuning;
-    tgtMultiScale = c.multiScale;
-    tgtScale = c.scaleLength;
-    tgtScales = [...scales];
-    tgtGauges = c.gauges.take(count).toList();
-    tgtWounds = c.wounds.take(count).toList();
-    tgtTensions = c.tensions.take(count).toList();
-    matchGenerated = true;
+    srcInstrument = c.instrument;
+    srcStringCount = count;
+    srcTuning = c.tuning;
+    srcMultiScale = c.multiScale;
+    srcScale = c.scaleLength;
+    srcScales = [...scales];
+    srcGauges = c.gauges.take(count).toList();
+    srcWounds = c.wounds.take(count).toList();
+    srcTensions = c.tensions.take(count).toList();
+    matchGenerated = false;
 
     update();
   }
@@ -1024,7 +1034,7 @@ class TuningWorkbenchController extends GetxController {
 
   // ---------- Math ----------
 
-  static const double _uwPlainCoeff = 0.2215;
+  static const double _uwPlainCoeff = 0.2216;
 
   static const Map<int, double> _uwWound = {
     17: 0.000082571,
@@ -1067,6 +1077,11 @@ class TuningWorkbenchController extends GetxController {
     100: 0.001690000,
     105: 0.001862000,
     110: 0.002042000,
+    115: 0.002235000,
+    120: 0.002441000,
+    125: 0.002661000,
+    130: 0.002894000,
+    135: 0.003140000,
   };
 
   double _getUw(String gauge, bool isWound, double stringTypeMult) {
@@ -1141,7 +1156,7 @@ class TuningWorkbenchController extends GetxController {
     var bestIndex = 0;
     var bestDiff = double.infinity;
     for (var i = 0; i < steps.length; i++) {
-      final diff = (double.tryParse(steps[i]) ?? 0 - current).abs();
+      final diff = ((double.tryParse(steps[i]) ?? 0) - current).abs();
       if (diff < bestDiff) {
         bestDiff = diff;
         bestIndex = i;

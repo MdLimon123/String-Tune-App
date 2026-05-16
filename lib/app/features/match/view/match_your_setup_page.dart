@@ -146,7 +146,7 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Source Neck Tension: ${c.srcTensions.fold<double>(0, (a, b) => a + b).toStringAsFixed(1)} lbs',
+                        'Source Neck Tension: ${c.srcTensions.fold<double>(0, (a, b) => a + b).round()} lbs',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -178,13 +178,41 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                     }),
                     const SizedBox(height: 20),
 
+                    const SizedBox(height: 30),
                     CustomButton(
-                      onTap: c.generateMatchFeel,
+                      onTap: () {
+                        c.generateMatchFeel();
+                        setState(() {});
+                      },
                       text: 'Match The Feel',
                     ),
+                    const SizedBox(height: 30),
 
-                    if (c.matchGenerated && c.tgtGauges.isNotEmpty) ...[
-                      const SizedBox(height: 24),
+                    if (c.matchGenerated) ...[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'MATCHED GAUGES',
+                            style: TextStyle(
+                              fontSize: 10,
+                              letterSpacing: 2.0,
+                              color: Color(0xFF8888EE),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${c.resolveTuningLabel(c.tgtTuning)} Std · ${c.tgtMultiScale ? "multi-scale" : "${c.tgtScale}\""} · matched to ${c.resolveTuningLabel(c.srcTuning)} Std · ${c.srcMultiScale ? "multi-scale" : "${c.srcScale}\""}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -193,13 +221,80 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Matched Neck Tension: ${c.tgtTensions.fold<double>(0, (a, b) => a + b).toStringAsFixed(1)} lbs',
+                          'Matched Neck Tension: ${c.tgtTensions.fold<double>(0, (a, b) => a + b).round()} lbs',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Tension Comparison Box
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF1E293B)),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'TENSION COMPARISON',
+                              style: TextStyle(
+                                color: Color(0xFF475569),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'SOURCE',
+                                      style: TextStyle(color: Color(0xFF4ADE80), fontSize: 11, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${(c.srcTensions.fold<double>(0, (a, b) => a + b) / c.srcStringCount).toStringAsFixed(1)} avg lbs',
+                                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      '${c.resolveTuningLabel(c.srcTuning)} - ${c.srcScale.toStringAsFixed(1)}"',
+                                      style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    const Text(
+                                      'MATCHED',
+                                      style: TextStyle(color: Color(0xFF9333EA), fontSize: 11, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${(c.tgtTensions.fold<double>(0, (a, b) => a + b) / c.srcStringCount).toStringAsFixed(1)} avg lbs',
+                                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      '${c.resolveTuningLabel(c.tgtTuning)} - ${c.tgtScale.toStringAsFixed(1)}"',
+                                      style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -235,7 +330,7 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                         onTap: () async {
                           c.loadMatchResultIntoCalculator();
                           await Get.toNamed(AppRoutes.calculate);
-                          c.syncMatchResultFromCalculator();
+                          c.syncMatchSrcFromCalculator();
                         },
                         child: Container(
                           width: double.infinity,

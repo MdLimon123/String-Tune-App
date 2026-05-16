@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'tuning_models.dart';
 
 double nf(String note) => _noteHz[note] ?? 82.41;
@@ -60,22 +61,22 @@ const List<TuningDefinition> tuningList = [
     id: 'Eb',
     label: 'Eb Standard',
     group: 'Standard',
-    names6: ['eb', 'Bb', 'G', 'Db', 'Ab', 'Eb'],
-    notes: [311.13, 233.08, 196.00, 138.59, 103.83, 77.78],
+    names6: ['eb', 'Bb', 'Gb', 'Db', 'Ab', 'Eb'],
+    notes: [311.13, 233.08, 185.00, 138.59, 103.83, 77.78],
   ),
   TuningDefinition(
     id: 'D',
     label: 'D Standard',
     group: 'Standard',
-    names6: ['d', 'A', 'F#', 'C', 'G', 'D'],
-    notes: [293.66, 220.00, 185.00, 130.81, 98.00, 73.42],
+    names6: ['d', 'A', 'F', 'C', 'G', 'D'],
+    notes: [293.66, 220.00, 174.61, 130.81, 98.00, 73.42],
   ),
   TuningDefinition(
-    id: 'C#',
+    id: 'C_sharp',
     label: 'C# Standard',
     group: 'Standard',
-    names6: ['c#', 'Ab', 'F', 'B', 'F#', 'C#'],
-    notes: [277.18, 207.65, 174.61, 123.47, 92.50, 69.30],
+    names6: ['c#', 'Ab', 'E', 'B', 'F#', 'C#'],
+    notes: [277.18, 207.65, 164.81, 123.47, 92.50, 69.30],
   ),
   TuningDefinition(
     id: 'C',
@@ -106,90 +107,128 @@ const List<TuningDefinition> tuningList = [
     notes: [220.00, 164.81, 130.81, 98.00, 73.42, 55.00],
   ),
   TuningDefinition(
-    id: 'F',
-    label: 'F Standard',
-    group: 'Standard',
-    names6: ['f', 'C', 'Ab', 'Eb', 'Bb', 'F'],
-    notes: [174.61, 130.81, 103.83, 77.78, 58.27, 43.65],
-  ),
-  TuningDefinition(
-    id: 'DropD',
+    id: 'Drop_D',
     label: 'Drop D',
     group: 'Drop',
     names6: ['e', 'B', 'G', 'D', 'A', 'D'],
     notes: [329.63, 246.94, 196.00, 146.83, 110.00, 73.42],
   ),
   TuningDefinition(
-    id: 'DropC#',
+    id: 'Drop_Db',
+    label: 'Drop Db',
+    group: 'Drop',
+    names6: ['eb', 'Bb', 'Gb', 'Db', 'Ab', 'Db'],
+    notes: [311.13, 233.08, 185.00, 138.59, 103.83, 69.30],
+  ),
+  TuningDefinition(
+    id: 'Drop_C_sharp',
     label: 'Drop C#',
     group: 'Drop',
     names6: ['c#', 'Ab', 'E', 'B', 'F#', 'C#'],
     notes: [277.18, 207.65, 164.81, 123.47, 92.50, 69.30],
   ),
   TuningDefinition(
-    id: 'DropC',
+    id: 'Drop_C',
     label: 'Drop C',
     group: 'Drop',
     names6: ['d', 'A', 'F', 'C', 'G', 'C'],
     notes: [293.66, 220.00, 174.61, 130.81, 98.00, 65.41],
   ),
   TuningDefinition(
-    id: 'DropB',
+    id: 'Drop_B',
     label: 'Drop B',
     group: 'Drop',
     names6: ['c#', 'Ab', 'E', 'B', 'F#', 'B'],
     notes: [277.18, 207.65, 164.81, 123.47, 92.50, 61.74],
   ),
   TuningDefinition(
-    id: 'DropA',
+    id: 'Drop_A',
     label: 'Drop A',
     group: 'Drop',
     names6: ['b', 'F#', 'D', 'A', 'E', 'A'],
     notes: [246.94, 185.00, 146.83, 110.00, 82.41, 55.00],
   ),
   TuningDefinition(
-    id: 'DropF',
+    id: 'Drop_F',
     label: 'Drop F',
     group: 'Drop',
     names6: ['g', 'D', 'Bb', 'F', 'C', 'F'],
     notes: [196.00, 146.83, 116.54, 87.31, 65.41, 43.65],
   ),
   TuningDefinition(
-    id: 'OpenE',
+    id: 'Open_E',
     label: 'Open E',
     group: 'Open',
     names6: ['e', 'B', 'Ab', 'E', 'B', 'E'],
     notes: [329.63, 246.94, 207.65, 164.81, 123.47, 82.41],
   ),
   TuningDefinition(
-    id: 'OpenD',
+    id: 'Open_D',
     label: 'Open D',
     group: 'Open',
     names6: ['d', 'A', 'F#', 'D', 'A', 'D'],
     notes: [293.66, 220.00, 185.00, 146.83, 110.00, 73.42],
   ),
   TuningDefinition(
-    id: 'OpenC',
+    id: 'Open_C',
     label: 'Open C',
     group: 'Open',
     names6: ['e', 'C', 'G', 'C', 'G', 'C'],
     notes: [329.63, 261.63, 196.00, 130.81, 98.00, 65.41],
   ),
   TuningDefinition(
-    id: 'OpenG',
+    id: 'Open_G',
     label: 'Open G',
     group: 'Open',
     names6: ['d', 'B', 'G', 'D', 'G', 'D'],
     notes: [293.66, 246.94, 196.00, 146.83, 98.00, 73.42],
   ),
   TuningDefinition(
-    id: 'OpenA',
+    id: 'Open_A',
     label: 'Open A',
     group: 'Open',
     names6: ['e', 'C#', 'A', 'E', 'A', 'E'],
     notes: [329.63, 277.18, 220.00, 164.81, 110.00, 82.41],
   ),
 ];
+
+List<double> getStringFreqs(String instrument, int stringCount, String tuningId) {
+  final tuning = tuningList.firstWhere((t) => t.id == tuningId,
+      orElse: () => tuningList.first);
+  final std = tuningList.firstWhere((t) => t.id == 'E');
+
+  if (instrument == 'bass') {
+    final bNF = {
+      4: [196.00, 146.83, 110.00, 82.41],
+      5: [196.00, 146.83, 110.00, 82.41, 61.74],
+      6: [261.63, 196.00, 146.83, 110.00, 82.41, 61.74],
+    };
+    final currentLowE = tuning.notes.length > 5 ? tuning.notes[5] : 82.41;
+    final stdLowE = std.notes[5];
+    final semitoneOffset =
+        (12 * math.log(currentLowE / stdLowE) / math.ln2).round();
+    final st = math.pow(2, 1 / 12);
+    return (bNF[stringCount] ?? bNF[4]!)
+        .map((f) => f * math.pow(st, semitoneOffset))
+        .toList();
+  }
+
+  final base6 = tuning.notes;
+  if (stringCount == 6) return base6;
+
+  if (stringCount == 7) {
+    // Standard 7 is B-E, so we shift base6 and add a low B
+    final lowB = tuning.notes[5] * math.pow(2, -5 / 12);
+    return [...base6, lowB];
+  }
+  if (stringCount == 8) {
+    final lowB = tuning.notes[5] * math.pow(2, -5 / 12);
+    final lowFSharp = lowB * math.pow(2, -5 / 12);
+    return [...base6, lowB, lowFSharp];
+  }
+
+  return base6;
+}
 
 const List<StringTypeDefinition> stringTypes = [
   StringTypeDefinition(id: 'nickel', label: 'Nickel Wound', mult: 1.00),
@@ -478,9 +517,12 @@ const List<String> plainSteps = [
   '.009',
   '.0095',
   '.010',
+  '.0105',
   '.011',
+  '.0115',
   '.012',
   '.013',
+  '.0135',
   '.014',
   '.015',
   '.016',
@@ -488,6 +530,9 @@ const List<String> plainSteps = [
   '.018',
   '.019',
   '.020',
+  '.022',
+  '.024',
+  '.026',
 ];
 
 const List<String> woundSteps = [
@@ -523,6 +568,7 @@ const List<String> woundSteps = [
   '.070',
   '.072',
   '.074',
+  '.076',
   '.080',
   '.085',
   '.090',
@@ -530,4 +576,9 @@ const List<String> woundSteps = [
   '.100',
   '.105',
   '.110',
+  '.115',
+  '.120',
+  '.125',
+  '.130',
+  '.135',
 ];
