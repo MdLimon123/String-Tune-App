@@ -183,9 +183,9 @@ class TuningWorkbenchController extends GetxController {
 
     if (instrument == 'bass') {
       final base = <int, List<double>>{
-        4: [98.00, 73.42, 55.00, 41.20],
-        5: [98.00, 73.42, 55.00, 41.20, 30.87],
-        6: [130.81, 98.00, 73.42, 55.00, 41.20, 30.87],
+        4: [98.00, 73.42, 55.00, 82.41],
+        5: [98.00, 73.42, 55.00, 82.41, 61.74],
+        6: [130.81, 98.00, 73.42, 55.00, 82.41, 61.74],
       };
       final semitoneOffset =
           (12 * math.log((tuning.notes[5]) / 82.41) / math.ln2).round();
@@ -1034,7 +1034,7 @@ class TuningWorkbenchController extends GetxController {
 
   // ---------- Math ----------
 
-  static const double _uwPlainCoeff = 0.2216;
+  static const double _uwPlainCoeff = 0.2215;
 
   static const Map<int, double> _uwWound = {
     17: 0.000082571,
@@ -1077,11 +1077,6 @@ class TuningWorkbenchController extends GetxController {
     100: 0.001690000,
     105: 0.001862000,
     110: 0.002042000,
-    115: 0.002235000,
-    120: 0.002441000,
-    125: 0.002661000,
-    130: 0.002894000,
-    135: 0.003140000,
   };
 
   double _getUw(String gauge, bool isWound, double stringTypeMult) {
