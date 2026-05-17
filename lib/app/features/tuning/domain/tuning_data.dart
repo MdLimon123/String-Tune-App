@@ -405,9 +405,9 @@ const Map<int, List<bool>> defaultWoundGuitar = {
 };
 
 const Map<int, List<bool>> defaultWoundBass = {
-  4: [false, true, true, true],
-  5: [false, true, true, true, true],
-  6: [false, false, true, true, true, true],
+  4: [true, true, true, true],
+  5: [true, true, true, true, true],
+  6: [true, true, true, true, true, true],
 };
 
 const Map<int, List<String>> defaultGuitarGauges = {

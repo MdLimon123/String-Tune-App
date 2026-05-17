@@ -43,7 +43,7 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Optimized for ${c.resolveTuningLabel(result.tuning)} at ${result.scales.first.toStringAsFixed(1)}"',
+                  'Optimized for ${c.resolveTuningLabel(result.tuning)} at ${c.formatScale(result.scales.first)}"',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -329,7 +329,7 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
             Expanded(
               flex: 2,
               child: Text(
-                '${scale.toStringAsFixed(1)}"',
+                '${c.formatScale(scale)}"',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 11,

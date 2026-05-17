@@ -82,6 +82,62 @@ class TuningWorkbenchController extends GetxController {
 
   List<String> get stringTypeLabels => stringTypes.map((e) => e.label).toList();
 
+  static const List<double> availableScales = [
+    24.0,
+    24.5,
+    24.625,
+    24.75,
+    25.0,
+    25.5,
+    26.0,
+    26.5,
+    27.0,
+    27.5,
+    28.0,
+    28.5,
+    29.0,
+    29.5,
+    30.0,
+    30.5,
+    31.0,
+    31.5,
+    32.0,
+    32.5,
+    33.0,
+    33.5,
+    34.0,
+    34.5,
+    35.0,
+    35.5,
+    36.0,
+  ];
+
+  double getNextScale(double current) {
+    for (final scale in availableScales) {
+      if (scale > current + 0.001) {
+        return scale;
+      }
+    }
+    return availableScales.last;
+  }
+
+  double getPrevScale(double current) {
+    for (final scale in availableScales.reversed) {
+      if (scale < current - 0.001) {
+        return scale;
+      }
+    }
+    return availableScales.first;
+  }
+
+  String formatScale(double scale) {
+    String s = scale.toString();
+    if (s.endsWith('.0')) {
+      return s.substring(0, s.length - 2);
+    }
+    return s;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -310,9 +366,39 @@ class TuningWorkbenchController extends GetxController {
     update();
   }
 
+  void incrementMatchScale() {
+    srcScale = getNextScale(srcScale);
+    matchGenerated = false;
+    _recalcSrc();
+    update();
+  }
+
+  void decrementMatchScale() {
+    srcScale = getPrevScale(srcScale);
+    matchGenerated = false;
+    _recalcSrc();
+    update();
+  }
+
   void setMatchScaleAt(int index, double scale) {
     if (index >= srcScales.length) return;
     srcScales[index] = scale;
+    matchGenerated = false;
+    _recalcSrc();
+    update();
+  }
+
+  void incrementMatchScaleAt(int index) {
+    if (index >= srcScales.length) return;
+    srcScales[index] = getNextScale(srcScales[index]);
+    matchGenerated = false;
+    _recalcSrc();
+    update();
+  }
+
+  void decrementMatchScaleAt(int index) {
+    if (index >= srcScales.length) return;
+    srcScales[index] = getPrevScale(srcScales[index]);
     matchGenerated = false;
     _recalcSrc();
     update();
@@ -361,6 +447,20 @@ class TuningWorkbenchController extends GetxController {
     update();
   }
 
+  void incrementTargetScale() {
+    tgtScale = getNextScale(tgtScale);
+    matchGenerated = false;
+    _recalcTgt();
+    update();
+  }
+
+  void decrementTargetScale() {
+    tgtScale = getPrevScale(tgtScale);
+    matchGenerated = false;
+    _recalcTgt();
+    update();
+  }
+
   void setTargetMultiScale(bool value) {
     tgtMultiScale = value;
     matchGenerated = false;
@@ -371,6 +471,22 @@ class TuningWorkbenchController extends GetxController {
   void setTargetScaleAt(int index, double scale) {
     if (index >= tgtScales.length) return;
     tgtScales[index] = scale;
+    matchGenerated = false;
+    _recalcTgt();
+    update();
+  }
+
+  void incrementTargetScaleAt(int index) {
+    if (index >= tgtScales.length) return;
+    tgtScales[index] = getNextScale(tgtScales[index]);
+    matchGenerated = false;
+    _recalcTgt();
+    update();
+  }
+
+  void decrementTargetScaleAt(int index) {
+    if (index >= tgtScales.length) return;
+    tgtScales[index] = getPrevScale(tgtScales[index]);
     matchGenerated = false;
     _recalcTgt();
     update();
@@ -495,8 +611,34 @@ class TuningWorkbenchController extends GetxController {
     update();
   }
 
+  void incrementBuildStringScale(int index) {
+    if (index >= buildScales.length) return;
+    buildScales[index] = getNextScale(buildScales[index]);
+    buildResult = null;
+    update();
+  }
+
+  void decrementBuildStringScale(int index) {
+    if (index >= buildScales.length) return;
+    buildScales[index] = getPrevScale(buildScales[index]);
+    buildResult = null;
+    update();
+  }
+
   void setBuildSingleScale(double scale) {
     buildSingleScale = scale;
+    buildResult = null;
+    update();
+  }
+
+  void incrementBuildSingleScale() {
+    buildSingleScale = getNextScale(buildSingleScale);
+    buildResult = null;
+    update();
+  }
+
+  void decrementBuildSingleScale() {
+    buildSingleScale = getPrevScale(buildSingleScale);
     buildResult = null;
     update();
   }
@@ -1080,7 +1222,8 @@ class TuningWorkbenchController extends GetxController {
   };
 
   double _getUw(String gauge, bool isWound, double stringTypeMult) {
-    final d = double.tryParse(gauge) ?? 0;
+    final clean = gauge.replaceAll(RegExp(r'[wp]$', caseSensitive: false), '').trim();
+    final d = double.tryParse(clean) ?? 0;
     if (d <= 0) return 0;
 
     if (!isWound) {
@@ -1171,14 +1314,14 @@ class TuningWorkbenchController extends GetxController {
   ) {
     if (isBass) {
       return _SolvedString(
-        gauge: _solveGauge(targetT, true, scaleIn, freqHz, stMult),
+        gauge: _solveGauge(targetT, true, scaleIn, freqHz, 1.0),
         wound: true,
       );
     }
 
     if (stringPos <= 1) {
       return _SolvedString(
-        gauge: _solveGauge(targetT * plainMult, false, scaleIn, freqHz, stMult),
+        gauge: _solveGauge(targetT * plainMult, false, scaleIn, freqHz, 1.0),
         wound: false,
       );
     }
@@ -1269,7 +1412,10 @@ class TuningWorkbenchController extends GetxController {
     if (gauges.length != stringCount || wounds.length != stringCount) {
       return false;
     }
-    if (gauges.any((g) => g.isEmpty || (double.tryParse(g) ?? 0) <= 0)) {
+    if (gauges.any((g) {
+      final clean = g.replaceAll(RegExp(r'[wp]$', caseSensitive: false), '').trim();
+      return clean.isEmpty || (double.tryParse(clean) ?? 0) <= 0;
+    })) {
       return false;
     }
 
@@ -1300,7 +1446,10 @@ class TuningWorkbenchController extends GetxController {
   }) {
     final normalizedGauges = gauges
         .take(stringCount)
-        .map((g) => (double.tryParse(g.trim()) ?? 0).toStringAsFixed(3))
+        .map((g) {
+          final clean = g.replaceAll(RegExp(r'[wp]$', caseSensitive: false), '').trim();
+          return (double.tryParse(clean) ?? 0).toStringAsFixed(3);
+        })
         .join('|');
     final normalizedWounds = wounds
         .take(stringCount)

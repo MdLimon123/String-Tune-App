@@ -396,7 +396,7 @@ class _MatchFeedInPageState extends State<MatchFeedInPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${(guitarStrings[index]['scale'] as double).toStringAsFixed(1)}"',
+                  '${(guitarStrings[index]['scale'] as double).toString().replaceAll(RegExp(r'\.0$'), '')}"',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 11,

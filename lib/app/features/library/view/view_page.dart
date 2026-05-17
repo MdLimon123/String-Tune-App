@@ -74,7 +74,7 @@ class _ViewPageState extends State<ViewPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Scale Length: ${calc.scaleLength.toStringAsFixed(1)}"',
+                        'Scale Length: ${c.formatScale(calc.scaleLength)}"',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,

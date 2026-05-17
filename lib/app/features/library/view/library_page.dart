@@ -150,7 +150,7 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget _buildTuningCard(SavedSetup setup) {
     final scale = setup.scaleLength.contains(',')
         ? 'Multi-Scale'
-        : '${double.tryParse(setup.scaleLength)?.toStringAsFixed(1) ?? setup.scaleLength}"';
+        : '${double.tryParse(setup.scaleLength) != null ? wb.formatScale(double.parse(setup.scaleLength)) : setup.scaleLength}"';
 
     return Container(
       decoration: BoxDecoration(

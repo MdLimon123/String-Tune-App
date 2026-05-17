@@ -4,6 +4,8 @@ import 'package:does_it_doom/app/core/utils/custom_switch.dart';
 import 'package:does_it_doom/app/core/utils/custom_text_field.dart';
 import 'package:does_it_doom/app/features/buildSetup/view/recommended_setup_page.dart';
 import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
+import 'package:does_it_doom/app/features/tuning/domain/tuning_data.dart';
+import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -74,9 +76,9 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
                     const SizedBox(height: 10),
                     Center(
                       child: _buildCounter(
-                        value: '${c.buildSingleScale.toStringAsFixed(1)}"',
-                        onDecrement: () => c.setBuildSingleScale((c.buildSingleScale - 0.5).clamp(24.0, 36.0)),
-                        onIncrement: () => c.setBuildSingleScale((c.buildSingleScale + 0.5).clamp(24.0, 36.0)),
+                        value: '${c.formatScale(c.buildSingleScale)}"',
+                        onDecrement: c.decrementBuildSingleScale,
+                        onIncrement: c.incrementBuildSingleScale,
                       ),
                     ),
 
@@ -162,8 +164,7 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: _buildBottomSheet(
-                    items: c.tuningLabels,
+                  child: _buildTuningBottomSheet(
                     onSelect: (item) {
                       c.setBuildTuningByLabel(item);
                       setState(() => showTuningDropdown = false);
@@ -372,6 +373,119 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
             ),
           ),
           const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTuningBottomSheet({
+    required ValueChanged<String> onSelect,
+  }) {
+    final Map<String, List<TuningDefinition>> grouped = {};
+    for (final tuning in tuningList) {
+      grouped.putIfAbsent(tuning.group, () => []).add(tuning);
+    }
+
+    final groupsOrder = ['Standard', 'Drop', 'Open Major', 'Open Minor', 'Modal/Drone'];
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: Color(0xFF15192B),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black54,
+            blurRadius: 25,
+            offset: Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 44,
+            height: 4,
+            margin: const EdgeInsets.only(top: 12, bottom: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF374151),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'Select Tuning',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              itemCount: groupsOrder.length,
+              itemBuilder: (context, groupIdx) {
+                final groupName = groupsOrder[groupIdx];
+                final tunings = grouped[groupName] ?? [];
+                if (tunings.isEmpty) return const SizedBox.shrink();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (groupName != 'Standard') ...[
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          groupName,
+                          style: const TextStyle(
+                            color: Color(0xFFFF6B35),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: tunings.length,
+                      itemBuilder: (context, idx) {
+                        final tuning = tunings[idx];
+                        return Column(
+                          children: [
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                tuning.label,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              onTap: () => onSelect(tuning.label),
+                            ),
+                            if (idx < tunings.length - 1)
+                              const Divider(
+                                color: Color(0xFF2A2F45),
+                                height: 1,
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

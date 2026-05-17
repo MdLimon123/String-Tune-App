@@ -176,9 +176,35 @@ class CalculateController extends GetxController {
     update();
   }
 
+  void incrementScaleLength() {
+    scaleLength = wb.getNextScale(scaleLength);
+    _recalcTensions();
+    update();
+  }
+
+  void decrementScaleLength() {
+    scaleLength = wb.getPrevScale(scaleLength);
+    _recalcTensions();
+    update();
+  }
+
   void setPerStringScale(int index, double scale) {
     if (index >= perStringScales.length) return;
     perStringScales[index] = scale;
+    _recalcTensions();
+    update();
+  }
+
+  void incrementPerStringScale(int index) {
+    if (index >= perStringScales.length) return;
+    perStringScales[index] = wb.getNextScale(perStringScales[index]);
+    _recalcTensions();
+    update();
+  }
+
+  void decrementPerStringScale(int index) {
+    if (index >= perStringScales.length) return;
+    perStringScales[index] = wb.getPrevScale(perStringScales[index]);
     _recalcTensions();
     update();
   }
