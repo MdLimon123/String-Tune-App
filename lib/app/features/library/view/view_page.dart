@@ -101,7 +101,7 @@ class _ViewPageState extends State<ViewPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Total Tension: ${total.round()} lbs',
+                        'Total Tension: ${total.round()} lbs  ·  Avg: ${(calc.gauges.isNotEmpty ? total / calc.gauges.length : 0.0).toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,

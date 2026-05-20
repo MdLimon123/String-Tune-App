@@ -216,7 +216,18 @@ class TuningWorkbenchController extends GetxController {
     final base6 = tuning?.names6 ?? const ['e', 'B', 'G', 'D', 'A', 'E'];
 
     if (instrument == 'bass') {
-      return bassStringNames[stringCount] ?? bassStringNames[4]!;
+      final base = bassStringNames[stringCount] ?? bassStringNames[4]!;
+      final stdFreq = 82.41;
+      final curFreq = tuning?.notes[5] ?? stdFreq;
+      final semis = (12 * math.log(curFreq / stdFreq) / math.ln2).round();
+      if (semis == 0) return base;
+
+      const chromatic = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+      return base.map((name) {
+        final idx = chromatic.indexOf(name);
+        if (idx == -1) return name;
+        return chromatic[((idx + semis) % 12 + 12) % 12];
+      }).toList();
     }
     if (stringCount == 7) {
       return [...base6, 'B'];
@@ -1227,7 +1238,7 @@ class TuningWorkbenchController extends GetxController {
     if (d <= 0) return 0;
 
     if (!isWound) {
-      return _uwPlainCoeff * d * d;
+      return _uwPlainCoeff * d * d * stringTypeMult;
     }
 
     final thou = (d * 1000).round();

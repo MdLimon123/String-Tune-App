@@ -233,7 +233,7 @@ class _MatchFeedInPageState extends State<MatchFeedInPage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Total Tension: 118.4 lbs",
+                    "Total Tension: 118.4 lbs  ·  Avg: 19.7 lbs",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,

@@ -49,10 +49,7 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                   : List<double>.filled(gauges.length, artist.scaleLength));
           final tensions = isEdited
               ? c.artistEditedTensions!
-              : (artist.apiStringTensions != null &&
-                      artist.apiStringTensions!.length == gauges.length
-                  ? artist.apiStringTensions!
-                  : c.computeArtistTensions(artist));
+              : c.computeArtistTensions(artist);
           final names = c.getStringNames(instrument, gauges.length, tuning);
           final total = tensions.fold<double>(0, (a, b) => a + b);
           final gaugeWithSuffix = List.generate(
@@ -98,7 +95,7 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total neck tension: ${total.round()} lbs',
+                        'Total neck tension: ${total.round()} lbs  ·  Avg: ${(gauges.isNotEmpty ? total / gauges.length : 0.0).toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -108,13 +105,21 @@ class _ArtistTuningsDetailsPageState extends State<ArtistTuningsDetailsPage> {
                       if (artist.totalTensionApi != null &&
                           artist.totalTensionApi!.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        Text(
-                          'Total tension: ${artist.totalTensionApi} lbs',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white70,
-                          ),
+                        Builder(
+                          builder: (context) {
+                            final apiTotal = double.tryParse(artist.totalTensionApi!);
+                            final apiAvgText = apiTotal != null && gauges.isNotEmpty
+                                ? '  ·  Avg: ${(apiTotal / gauges.length).toStringAsFixed(1)} lbs'
+                                : '';
+                            return Text(
+                              'Total tension: ${artist.totalTensionApi} lbs$apiAvgText',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white70,
+                              ),
+                            );
+                          }
                         ),
                       ],
                       const SizedBox(height: 12),

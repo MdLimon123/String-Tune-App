@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                   title: "Calculate",
                   subtitle: "Tension Calculator",
                   text: "Calculate string tension instantly",
-                  image: 'assets/image/1 25.png',
+                  image: 'assets/image/tension.png',
                   onTap: () {
                     Get.find<CalculateController>().resetForNewCalculation();
                     Get.toNamed(AppRoutes.calculate);
@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                   title: "Feel-Based",
                   subtitle: "Match My Feel",
                   text: "Keep your exact feel in any tuning",
-                  image: 'assets/image/2 6.png',
+                  image: 'assets/image/match.png',
                   onTap: () {
                     Get.find<CalculateController>().clearEditingId();
                     Get.toNamed(AppRoutes.matchYourSetup);
@@ -51,7 +51,7 @@ class HomeScreen extends StatelessWidget {
                   title: "New Setup",
                   subtitle: "Build A Setup",
                   text: "Choose loose, balanced, or tight — get gauges",
-                  image: 'assets/image/3 1.png',
+                  image: 'assets/image/build.png',
                   onTap: () {
                     Get.toNamed(AppRoutes.buildSetup);
                   },
@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                   title: "Artist Tunings",
                   subtitle: "Load A Legend's Setup",
                   text: "Play legendary setups on your guitar",
-                  image: 'assets/image/layer_1.png',
+                  image: 'assets/image/load.png',
                   onTap: () {
                     Get.toNamed(AppRoutes.artistTunings);
                   },

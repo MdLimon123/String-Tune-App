@@ -134,7 +134,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Total Neck Tension: ${calc.totalTension.round()} lbs',
+                        'Total Neck Tension: ${calc.totalTension.round()} lbs  ·  Avg: ${(calc.stringCount > 0 ? calc.totalTension / calc.stringCount : 0.0).toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,

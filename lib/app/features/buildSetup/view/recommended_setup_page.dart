@@ -86,7 +86,7 @@ class _RecommendedSetupPageState extends State<RecommendedSetupPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Neck Tension: ${total.toStringAsFixed(1)} lbs',
+                        'Total Neck Tension: ${total.round()} lbs  ·  Avg: ${(result.gauges.isNotEmpty ? total / result.gauges.length : 0.0).toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,

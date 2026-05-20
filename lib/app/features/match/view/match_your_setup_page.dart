@@ -148,7 +148,7 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Source Neck Tension: ${c.srcTensions.fold<double>(0, (a, b) => a + b).round()} lbs',
+                        'Source Neck Tension: ${c.srcTensions.fold<double>(0, (a, b) => a + b).round()} lbs  ·  Avg: ${(c.srcStringCount > 0 ? c.srcTensions.fold<double>(0, (a, b) => a + b) / c.srcStringCount : 0.0).toStringAsFixed(1)} lbs',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -223,7 +223,7 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Matched Neck Tension: ${c.tgtTensions.fold<double>(0, (a, b) => a + b).round()} lbs',
+                          'Matched Neck Tension: ${c.tgtTensions.fold<double>(0, (a, b) => a + b).round()} lbs  ·  Avg: ${(c.srcStringCount > 0 ? c.tgtTensions.fold<double>(0, (a, b) => a + b) / c.srcStringCount : 0.0).toStringAsFixed(1)} lbs',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,

@@ -200,6 +200,7 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
                                   text: _subtitleLine(artist),
                                   image: _defaultCardImage,
                                   tag: artist.instrument == 'bass' ? 'Bass' : 'Guitar',
+                                  scaleLength: '${wb.formatScale(artist.scaleLength)}"',
                                   onTap: () {
                                     wb.loadArtist(artist);
                                     Get.to(() => const ArtistTuningsDetailsPage());
@@ -226,6 +227,7 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
     required String text,
     required String image,
     required String tag,
+    required String scaleLength,
     required Function()? onTap,
   }) {
     return InkWell(
@@ -249,13 +251,26 @@ class _ArtistTuningsPageState extends State<ArtistTuningsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFA070D0),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFFA070D0),
+                            ),
+                          ),
+                          Text(
+                            scaleLength,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 6),
                       Text(

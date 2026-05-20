@@ -66,27 +66,39 @@ class ArtistController extends GetxController {
         timeout: const Duration(seconds: 90),
       );
 
+      final combined = <ArtistTuningEntry>[];
       if (body is Map && body['data'] is List) {
         final list = body['data'] as List;
-        _legendEntries =
-            list.map((raw) {
-              final m = Map<String, dynamic>.from(raw as Map);
-              final tuning = wb.tuningIdFromSelectedTuningApi(
-                m['selected_tuning']?.toString() ?? '',
-                m['instrument_type']?.toString() ?? 'guitar',
-                (m['total_strings'] as int?) ?? 6,
-              );
-              return ArtistTuningEntry.fromLegendApi(m, tuning);
-            }).where((e) => e.gauges.isNotEmpty).toList();
-      } else {
-        _legendEntries = [];
+        final apiEntries = list.map((raw) {
+          final m = Map<String, dynamic>.from(raw as Map);
+          final tuning = wb.tuningIdFromSelectedTuningApi(
+            m['selected_tuning']?.toString() ?? '',
+            m['instrument_type']?.toString() ?? 'guitar',
+            (m['total_strings'] as int?) ?? 6,
+          );
+          return ArtistTuningEntry.fromLegendApi(m, tuning);
+        }).where((e) => e.gauges.isNotEmpty).toList();
+        combined.addAll(apiEntries);
       }
+
+      // Add local static ones that are not duplicates by name and band
+      for (final loc in artistTunings) {
+        final isDup = combined.any((api) =>
+            api.name.toLowerCase() == loc.name.toLowerCase() &&
+            api.band.toLowerCase() == loc.band.toLowerCase());
+        if (!isDup) {
+          combined.add(loc);
+        }
+      }
+
+      _legendEntries = combined;
     } on ApiException catch (e) {
       errorMessage = e.message;
-      _legendEntries = [];
+      // Fallback to local entries so the screen is never blank if offline
+      _legendEntries = [...artistTunings];
     } catch (e) {
       errorMessage = e.toString();
-      _legendEntries = [];
+      _legendEntries = [...artistTunings];
     }
 
     loading = false;

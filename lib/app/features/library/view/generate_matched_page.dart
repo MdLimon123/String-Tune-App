@@ -127,7 +127,7 @@ class _GenerateMatchedPageState extends State<GenerateMatchedPage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Total Tension: 118.4 lbs",
+                    "Total Tension: 118.4 lbs  ·  Avg: 19.7 lbs",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -170,7 +170,7 @@ class _GenerateMatchedPageState extends State<GenerateMatchedPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Original:118.4 lbs",
+                    "Original: 118.4 lbs  ·  Avg: 19.7 lbs",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -179,7 +179,7 @@ class _GenerateMatchedPageState extends State<GenerateMatchedPage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "New:118.7 lbs",
+                    "New: 118.7 lbs  ·  Avg: 19.8 lbs",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
