@@ -185,6 +185,17 @@ class _LibraryPageState extends State<LibraryPage> {
               children: [
                 Expanded(
                   child: _actionButton(
+                    text: 'Load',
+                    fill: true,
+                    onTap: () {
+                      wb.loadSavedSetup(setup);
+                      Get.toNamed(AppRoutes.calculate);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _actionButton(
                     text: 'Match',
                     fill: true,
                     onTap: () {
@@ -196,7 +207,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _actionButton(
                     text: 'View',

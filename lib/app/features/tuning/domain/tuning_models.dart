@@ -80,7 +80,9 @@ class ArtistTuningEntry {
     final gaugeList = <String>[];
     for (final s in strings) {
       final m = Map<String, dynamic>.from(s as Map);
-      final g = m['gauge']?.toString() ?? '';
+      final rawG = m['gauge']?.toString() ?? '';
+      final gVal = double.tryParse(rawG) ?? 0.0;
+      final g = gVal > 0 ? gVal.toStringAsFixed(3) : rawG;
       final w = m['type']?.toString().toLowerCase() == 'w';
       gaugeList.add('$g${w ? 'w' : 'p'}');
     }
@@ -218,7 +220,11 @@ class SavedSetup {
     final rawStrings = (json['strings'] as List?) ?? [];
     final strings = rawStrings.map((e) => Map<String, dynamic>.from(e as Map)).toList();
 
-    final gauges = strings.map((m) => m['gauge']?.toString() ?? '').toList();
+    final gauges = strings.map((m) {
+      final raw = m['gauge']?.toString() ?? '';
+      final v = double.tryParse(raw) ?? 0.0;
+      return v > 0 ? v.toStringAsFixed(3) : raw;
+    }).toList();
     final wounds = strings
         .map((m) => (m['type']?.toString().toLowerCase() == 'w'))
         .toList();

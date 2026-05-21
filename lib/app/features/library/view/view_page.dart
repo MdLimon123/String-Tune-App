@@ -1,7 +1,9 @@
 import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
+import 'package:does_it_doom/app/core/utils/custom_button.dart';
 import 'package:does_it_doom/app/features/calculate/controller/calculate_controller.dart';
 import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
+import 'package:does_it_doom/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -125,11 +127,47 @@ class _ViewPageState extends State<ViewPage> {
                 _buildTableHeader(),
                 const SizedBox(height: 8),
                 ...List.generate(calc.stringCount, (i) {
+                  final g = i < calc.gauges.length ? calc.gauges[i] : '';
+                  final w = i < calc.wounds.length ? calc.wounds[i] : false;
                   return _buildStringRow(
                     name: names[i],
+                    type: w ? 'W' : 'P',
+                    gauge: g,
                     tension: calc.tensions[i],
                   );
                 }),
+                const SizedBox(height: 32),
+                CustomButton(
+                  onTap: () {
+                    c.prepareShop(gauges: calc.gauges, wounds: calc.wounds);
+                    Get.toNamed(AppRoutes.shopSetup);
+                  },
+                  text: 'Shop This Setup',
+                ),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () async {
+                    await Get.toNamed(AppRoutes.calculate);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFFF6B35)),
+                      borderRadius: BorderRadius.circular(53),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Edit in Calculator',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFFF6B35),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           );
@@ -151,6 +189,8 @@ class _ViewPageState extends State<ViewPage> {
         child: Row(
           children: [
             Expanded(flex: 2, child: _headerCell('Strings')),
+            Expanded(flex: 3, child: _headerCell('Type')),
+            Expanded(flex: 2, child: _headerCell('Gauge')),
             Expanded(flex: 2, child: _headerCell('Tension')),
           ],
         ),
@@ -168,13 +208,19 @@ class _ViewPageState extends State<ViewPage> {
     textAlign: TextAlign.center,
   );
 
-  Widget _buildStringRow({required String name, required double tension}) {
+  Widget _buildStringRow({
+    required String name,
+    required String type,
+    required String gauge,
+    required double tension,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF15192B),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF2A2F45)),
       ),
       child: Row(
         children: [
@@ -186,6 +232,30 @@ class _ViewPageState extends State<ViewPage> {
                 color: Colors.white,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              type,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              gauge,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
             ),
@@ -207,7 +277,7 @@ class _ViewPageState extends State<ViewPage> {
                       '${tension.toStringAsFixed(1)} lbs',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

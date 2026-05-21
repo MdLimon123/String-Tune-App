@@ -213,9 +213,20 @@ class BaseApiService {
   }
 
   dynamic _processResponse(http.Response response) {
-    final body = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+    dynamic body;
+    try {
+      body = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+    } catch (_) {
+      body = null;
+    }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (body == null && response.body.isNotEmpty) {
+        throw ApiException(
+          message: 'Invalid response format from server',
+          statusCode: response.statusCode,
+        );
+      }
       return body;
     }
 

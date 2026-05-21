@@ -47,7 +47,6 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
       body: GetBuilder<TuningWorkbenchController>(
         builder: (_) {
           final isGuitar = c.srcInstrument == 'guitar';
-          final names = c.getStringNames(c.srcInstrument, c.srcStringCount, c.srcTuning);
           final matchedCount = c.tgtGauges.isNotEmpty ? c.tgtGauges.length : c.srcStringCount;
           final matchedNames = c.getStringNames(c.srcInstrument, matchedCount, c.tgtTuning);
 
@@ -80,30 +79,6 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    Center(child: _label('Scale Length')),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: _buildCounter(
-                        value: '${c.formatScale(c.srcScale)}"',
-                        onDecrement: c.decrementMatchScale,
-                        onIncrement: c.incrementMatchScale,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomSwitch(value: c.srcMultiScale, onChanged: c.setMatchMultiScale),
-                        const SizedBox(width: 10),
-                        const Text(
-                          'Multi-Scale Instrument',
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
                     _label('String Type'),
                     const SizedBox(height: 10),
                     GestureDetector(
@@ -126,7 +101,31 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                       }),
                       child: _buildDropdown(c.resolveTuningLabel(c.srcTuning)),
                     ),
+                    const SizedBox(height: 24),
+
+                    Center(child: _mixedLabel('Current', ' Scale Length')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildCounter(
+                        value: '${c.formatScale(c.srcScale)}"',
+                        onDecrement: c.decrementMatchScale,
+                        onIncrement: c.incrementMatchScale,
+                      ),
+                    ),
                     const SizedBox(height: 16),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomSwitch(value: c.srcMultiScale, onChanged: c.setMatchMultiScale),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Multi-Scale Instrument',
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
                     _label('Target Tuning'),
                     const SizedBox(height: 10),
@@ -140,47 +139,30 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF15192B),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Source Neck Tension: ${c.srcTensions.fold<double>(0, (a, b) => a + b).round()} lbs  ·  Avg: ${(c.srcStringCount > 0 ? c.srcTensions.fold<double>(0, (a, b) => a + b) / c.srcStringCount : 0.0).toStringAsFixed(1)} lbs',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
+                    Center(child: _mixedLabel('Target', ' Scale Length')),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: _buildCounter(
+                        value: '${c.formatScale(c.tgtScale)}"',
+                        onDecrement: c.decrementTargetScale,
+                        onIncrement: c.incrementTargetScale,
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    _buildTableHeader(showScale: c.srcMultiScale),
-                    const SizedBox(height: 8),
-                    ...List.generate(c.srcStringCount, (i) {
-                      final scale = c.srcMultiScale ? c.srcScales[i] : c.srcScale;
-                      return _buildStringRow(
-                        name: names[i],
-                        gauge: c.srcGauges[i],
-                        isWound: c.srcWounds[i],
-                        tension: c.srcTensions[i],
-                        scale: scale,
-                        showScale: c.srcMultiScale,
-                        onScaleUp: () => c.incrementMatchScaleAt(i),
-                        onScaleDown: () => c.decrementMatchScaleAt(i),
-                        onGaugeUp: () => c.bumpSrcGauge(i, 1),
-                        onGaugeDown: () => c.bumpSrcGauge(i, -1),
-                        onTypePlain: () => c.toggleSrcWound(i, false),
-                        onTypeWound: () => c.toggleSrcWound(i, true),
-                      );
-                    }),
-                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomSwitch(value: c.tgtMultiScale, onChanged: c.setTargetMultiScale),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Multi-Scale Instrument',
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
 
-                    const SizedBox(height: 30),
                     CustomButton(
                       onTap: () {
                         c.generateMatchFeel();
@@ -418,6 +400,29 @@ class _MatchYourSetupPageState extends State<MatchYourSetupPage> {
           color: Color(0xFFFFFFFF),
           fontSize: 14,
           fontWeight: FontWeight.w400,
+        ),
+      );
+
+  Widget _mixedLabel(String boldPart, String normalPart) => RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: boldPart,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            TextSpan(
+              text: normalPart,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
         ),
       );
 

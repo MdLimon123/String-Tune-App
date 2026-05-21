@@ -81,24 +81,13 @@ class ArtistController extends GetxController {
         combined.addAll(apiEntries);
       }
 
-      // Add local static ones that are not duplicates by name and band
-      for (final loc in artistTunings) {
-        final isDup = combined.any((api) =>
-            api.name.toLowerCase() == loc.name.toLowerCase() &&
-            api.band.toLowerCase() == loc.band.toLowerCase());
-        if (!isDup) {
-          combined.add(loc);
-        }
-      }
-
       _legendEntries = combined;
     } on ApiException catch (e) {
       errorMessage = e.message;
-      // Fallback to local entries so the screen is never blank if offline
-      _legendEntries = [...artistTunings];
+      _legendEntries = [];
     } catch (e) {
       errorMessage = e.toString();
-      _legendEntries = [...artistTunings];
+      _legendEntries = [];
     }
 
     loading = false;

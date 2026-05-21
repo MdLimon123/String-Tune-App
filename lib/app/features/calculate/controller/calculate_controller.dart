@@ -506,7 +506,11 @@ class CalculateController extends GetxController {
     );
 
     if (local == SaveSetupResult.saved) {
-      setupName.clear();
+      if (Get.isRegistered<LibraryController>()) {
+        try {
+          await Get.find<LibraryController>().fetchLibrary();
+        } catch (_) {}
+      }
       return CalculateSaveResult.saved;
     }
     if (local == SaveSetupResult.duplicate) {
@@ -526,10 +530,10 @@ class CalculateController extends GetxController {
     return List.filled(stringCount, scaleLength);
   }
 
-  double _gaugeStringToInches(String raw) {
+  String _gaugeToApiString(String raw) {
     final s = raw.trim().replaceAll(RegExp(r'[wp]$', caseSensitive: false), '');
     final v = double.tryParse(s) ?? 0.0;
-    return _apiDecimal2(v);
+    return v.toStringAsFixed(3); // e.g. 0.010, 0.046 — keeps 3rd significant digit
   }
 
   /// e.g. E standard → `EADGBE` (low string to high, pitch tokens).
@@ -560,7 +564,7 @@ class CalculateController extends GetxController {
         'string_name': names[i],
         'type': wound ? 'w' : 'p',
         'scale': _apiDecimal2(scales[i]),
-        'gauge': _gaugeStringToInches(g),
+        'gauge': _gaugeToApiString(g),
         'tension': _apiDecimal2(tension),
       };
     });
