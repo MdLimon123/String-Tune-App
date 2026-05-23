@@ -1,6 +1,7 @@
 import 'package:does_it_doom/app/core/utils/custom_appbar.dart';
 import 'package:does_it_doom/app/core/utils/custom_button.dart';
 import 'package:does_it_doom/app/features/calculate/controller/calculate_controller.dart';
+import 'package:does_it_doom/app/features/library/controller/library_controller.dart';
 import 'package:does_it_doom/app/features/tuning/controller/tuning_workbench_controller.dart';
 import 'package:does_it_doom/app/features/tuning/domain/tuning_models.dart';
 import 'package:does_it_doom/app/routes/app_routes.dart';
@@ -137,12 +138,121 @@ class _ViewPageState extends State<ViewPage> {
                   );
                 }),
                 const SizedBox(height: 32),
-                CustomButton(
-                  onTap: () {
-                    c.prepareShop(gauges: calc.gauges, wounds: calc.wounds);
-                    Get.toNamed(AppRoutes.shopSetup);
+                InkWell(
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          backgroundColor: const Color(0xFF0F172A),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: const BorderSide(color: Color(0xFF9333EA), width: 1.5),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Delete Setup',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Are you sure you want to delete this setup?',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 15,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 24),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: InkWell(
+                                        onTap: () => Navigator.of(context).pop(false),
+                                        child: Container(
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: const Color(0xFF9333EA), width: 1.5),
+                                            borderRadius: BorderRadius.circular(53),
+                                          ),
+                                          child: const Center(
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                color: Color(0xFFD8B4FE),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: InkWell(
+                                        onTap: () => Navigator.of(context).pop(true),
+                                        child: Container(
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEF4444),
+                                            borderRadius: BorderRadius.circular(53),
+                                          ),
+                                          child: const Center(
+                                            child: Text(
+                                              'Delete',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+                    if (confirm == true) {
+                      final lib = Get.find<LibraryController>();
+                      await lib.deleteSetup(widget.setup.id);
+                      await c.deleteSetup(widget.setup.id);
+                      if (mounted) Navigator.of(context).pop();
+                    }
                   },
-                  text: 'Shop This Setup',
+                  child: Container(
+                    width: double.infinity,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFEF4444), width: 1.5),
+                      borderRadius: BorderRadius.circular(53),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFEF4444),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 InkWell(

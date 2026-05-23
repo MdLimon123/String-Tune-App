@@ -56,4 +56,52 @@ class LibraryController extends GetxController {
     loading = false;
     update();
   }
+
+  Future<bool> renameSetup(int id, String newName) async {
+    if (newName.trim().isEmpty) return false;
+    try {
+      await _api.patch(
+        ApiEndpoints.calculateStringTensionEdit(id),
+        body: {
+          'setup_name': newName.trim(),
+        },
+        timeout: const Duration(seconds: 90),
+      );
+      // Update local item in the setups list immediately
+      setups = setups.map((s) {
+        if (s.id == id) {
+          return SavedSetup(
+            id: s.id,
+            name: newName.trim(),
+            instrument: s.instrument,
+            stringCount: s.stringCount,
+            gauges: s.gauges,
+            woundFlags: s.woundFlags,
+            scaleLength: s.scaleLength,
+            tuning: s.tuning,
+            savedAt: s.savedAt,
+          );
+        }
+        return s;
+      }).toList();
+      update();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteSetup(int id) async {
+    try {
+      await _api.delete(
+        ApiEndpoints.calculateStringTensionEdit(id),
+        timeout: const Duration(seconds: 90),
+      );
+      setups.removeWhere((s) => s.id == id);
+      update();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
