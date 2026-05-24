@@ -22,6 +22,8 @@ class _CalculateScreenState extends State<CalculateScreen> {
   final calc = Get.find<CalculateController>();
   final wb = Get.find<TuningWorkbenchController>();
 
+  int? activeScaleStringIndex;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,7 +105,46 @@ class _CalculateScreenState extends State<CalculateScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    if (calc.multiScale) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF1E293B)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'SCALE LENGTH PER STRING',
+                              style: TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ...List.generate(calc.stringCount, (i) {
+                              final stringNames = wb.getStringNames(
+                                calc.instrument,
+                                calc.stringCount,
+                                calc.tuning,
+                              );
+                              final name = stringNames[i];
+                              final scale = calc.perStringScales[i];
+                              return _buildMultiScaleStringRow(i, name, scale, calc);
+                            }),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ] else ...[
+                      const SizedBox(height: 24),
+                    ],
 
                     _label('String Type'),
                     const SizedBox(height: 10),
@@ -193,10 +234,15 @@ class _CalculateScreenState extends State<CalculateScreen> {
                 ),
               ),
 
-              if (calc.showTuningDropdown || calc.showStringTypeDropdown)
+              if (calc.showTuningDropdown || calc.showStringTypeDropdown || activeScaleStringIndex != null)
                 Positioned.fill(
                   child: GestureDetector(
-                    onTap: calc.hideDropdownOverlays,
+                    onTap: () {
+                      calc.hideDropdownOverlays();
+                      setState(() {
+                        activeScaleStringIndex = null;
+                      });
+                    },
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.3),
                     ),
@@ -224,6 +270,22 @@ class _CalculateScreenState extends State<CalculateScreen> {
                     onSelect: (item) {
                       calc.setStringTypeByLabel(item);
                       calc.closeStringTypeDropdown();
+                    },
+                  ),
+                ),
+              if (activeScaleStringIndex != null)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildScaleBottomSheet(
+                    index: activeScaleStringIndex!,
+                    calc: calc,
+                    onSelect: (scale) {
+                      calc.setPerStringScale(activeScaleStringIndex!, scale);
+                      setState(() {
+                        activeScaleStringIndex = null;
+                      });
                     },
                   ),
                 ),
@@ -449,6 +511,179 @@ class _CalculateScreenState extends State<CalculateScreen> {
             Icons.keyboard_arrow_down,
             color: Color(0xFFF1F5F9),
             size: 22,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMultiScaleStringRow(
+      int index, String name, double scale, CalculateController calc) {
+    final instrument = calc.instrument;
+    final min = instrument == 'bass' ? 30.0 : 24.0;
+    final max = instrument == 'bass' ? 36.0 : 32.0;
+    final fraction = ((scale - min) / (max - min)).clamp(0.0, 1.0);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 36,
+            child: Text(
+              name,
+              style: const TextStyle(
+                color: Color(0xFF8A8FA8),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  activeScaleStringIndex = index;
+                  calc.showTuningDropdown = false;
+                  calc.showStringTypeDropdown = false;
+                });
+              },
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: activeScaleStringIndex == index
+                        ? Colors.white
+                        : const Color(0xFF2A2F45),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${wb.formatScale(scale)}"',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Color(0xFF8A8FA8),
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            width: 32,
+            height: 6,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E2235),
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Stack(
+              children: [
+                FractionallySizedBox(
+                  widthFactor: fraction,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScaleBottomSheet({
+    required int index,
+    required CalculateController calc,
+    required ValueChanged<double> onSelect,
+  }) {
+    final instrument = calc.instrument;
+    final isBass = instrument == 'bass';
+    final scales = isBass
+        ? TuningWorkbenchController.availableScales.where((s) => s >= 30.0).toList()
+        : TuningWorkbenchController.availableScales.where((s) => s <= 32.0).toList();
+
+    return Container(
+      height: 380,
+      decoration: const BoxDecoration(
+        color: Color(0xFF15192B),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black54,
+            blurRadius: 25,
+            offset: Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 44,
+            height: 4,
+            margin: const EdgeInsets.only(top: 12, bottom: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF374151),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'Select Scale Length (String ${index + 1})',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              itemCount: scales.length,
+              separatorBuilder: (_, __) =>
+                  const Divider(color: Color(0xFF2A2F45), height: 1),
+              itemBuilder: (context, i) {
+                final scale = scales[i];
+                final isSelected = calc.perStringScales[index] == scale;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    '${wb.formatScale(scale)}"',
+                    style: TextStyle(
+                      color: isSelected ? const Color(0xFF9333EA) : Colors.white,
+                      fontSize: 15,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? const Icon(Icons.check, color: Color(0xFF9333EA), size: 20)
+                      : null,
+                  onTap: () => onSelect(scale),
+                );
+              },
+            ),
           ),
         ],
       ),
