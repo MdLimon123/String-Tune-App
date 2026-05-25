@@ -51,6 +51,8 @@ class _BuildSetupPageState extends State<BuildSetupPage> {
                       onChanged: (value) => c.setSetupName(value),
                     ),
 
+                          const SizedBox(height: 10),
+
                     Center(child: _label('Instrument')),
                     const SizedBox(height: 10),
                     Center(
