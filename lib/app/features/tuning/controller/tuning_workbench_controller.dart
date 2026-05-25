@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:does_it_doom/app/core/storage/storage_service.dart';
 import 'package:does_it_doom/app/features/calculate/controller/calculate_controller.dart';
+import 'package:does_it_doom/app/features/library/controller/library_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -159,6 +160,12 @@ class TuningWorkbenchController extends GetxController {
     } catch (_) {
       savedSetups = [];
     }
+    update();
+  }
+
+  Future<void> forceSyncSetups(List<SavedSetup> setups) async {
+    savedSetups = [...setups];
+    await _persistSavedSetups();
     update();
   }
 
@@ -996,7 +1003,12 @@ class TuningWorkbenchController extends GetxController {
     required String normalizedScale,
     required String tuning,
   }) {
-    return savedSetups.any((existing) {
+    List<SavedSetup> listToCheck = savedSetups;
+    if (Get.isRegistered<LibraryController>()) {
+      listToCheck = Get.find<LibraryController>().setups;
+    }
+
+    return listToCheck.any((existing) {
       return _buildSetupFingerprint(
             instrument: existing.instrument,
             stringCount: existing.stringCount,
@@ -1118,8 +1130,29 @@ class TuningWorkbenchController extends GetxController {
     return SaveSetupResult.saved;
   }
 
-  Future<void> deleteSetup(int id) async {
-    savedSetups.removeWhere((e) => e.id == id);
+  Future<void> deleteSetup(int id, {SavedSetup? setupToMatch}) async {
+    savedSetups.removeWhere((e) {
+      if (e.id == id) return true;
+      if (setupToMatch != null) {
+        return _buildSetupFingerprint(
+              instrument: e.instrument,
+              stringCount: e.stringCount,
+              gauges: e.gauges,
+              wounds: e.woundFlags,
+              scale: e.scaleLength,
+              tuning: e.tuning,
+            ) ==
+            _buildSetupFingerprint(
+              instrument: setupToMatch.instrument,
+              stringCount: setupToMatch.stringCount,
+              gauges: setupToMatch.gauges,
+              wounds: setupToMatch.woundFlags,
+              scale: setupToMatch.scaleLength,
+              tuning: setupToMatch.tuning,
+            );
+      }
+      return false;
+    });
     await _persistSavedSetups();
     update();
   }

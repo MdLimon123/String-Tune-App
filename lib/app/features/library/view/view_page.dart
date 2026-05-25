@@ -229,9 +229,11 @@ class _ViewPageState extends State<ViewPage> {
                     );
 
                     if (confirm == true) {
-                      final lib = Get.find<LibraryController>();
+                      final lib = Get.isRegistered<LibraryController>()
+                          ? Get.find<LibraryController>()
+                          : Get.put(LibraryController());
                       await lib.deleteSetup(widget.setup.id);
-                      await c.deleteSetup(widget.setup.id);
+                      await c.deleteSetup(widget.setup.id, setupToMatch: widget.setup);
                       if (mounted) Navigator.of(context).pop();
                     }
                   },

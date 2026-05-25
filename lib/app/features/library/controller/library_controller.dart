@@ -42,8 +42,10 @@ class LibraryController extends GetxController {
               );
               return SavedSetup.fromLibraryApi(m, tuning);
             }).where((s) => s.gauges.isNotEmpty).toList();
+        await wb.forceSyncSetups(setups);
       } else {
         setups = [];
+        await wb.forceSyncSetups([]);
       }
     } on ApiException catch (e) {
       errorMessage = e.message;

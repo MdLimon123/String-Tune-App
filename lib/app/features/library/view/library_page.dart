@@ -16,9 +16,20 @@ class LibraryPage extends StatefulWidget {
 }
 
 class _LibraryPageState extends State<LibraryPage> {
-  final lib = Get.find<LibraryController>();
-  final wb = Get.find<TuningWorkbenchController>();
+  late final LibraryController lib;
+  late final TuningWorkbenchController wb;
   final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    lib = Get.isRegistered<LibraryController>() 
+        ? Get.find<LibraryController>() 
+        : Get.put(LibraryController());
+    wb = Get.isRegistered<TuningWorkbenchController>() 
+        ? Get.find<TuningWorkbenchController>() 
+        : Get.put(TuningWorkbenchController());
+  }
 
   List<SavedSetup> get _filtered {
     final q = _searchController.text.trim().toLowerCase();
