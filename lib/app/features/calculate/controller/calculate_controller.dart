@@ -469,7 +469,7 @@ class CalculateController extends GetxController {
             timeout: const Duration(seconds: 90),
           );
         } else {
-          await _api.put(
+          await _api.patch(
             ApiEndpoints.calculateStringTensionEdit(editingSetupId!),
             body: body,
             timeout: const Duration(seconds: 90),

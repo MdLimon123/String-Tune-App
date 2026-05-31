@@ -137,6 +137,7 @@ class ArtistTuningEntry {
   }
 }
 
+
 class StringPack {
   const StringPack({
     required this.id,
