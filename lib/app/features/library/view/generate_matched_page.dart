@@ -119,6 +119,7 @@ class _GenerateMatchedPageState extends State<GenerateMatchedPage> {
                   SizedBox(height: 8),
                   Text(
                     "Gauge Range: .010–.046",
+                  
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
